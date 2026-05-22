@@ -1,0 +1,93 @@
+{
+  "nodes": [
+    {
+      "node_id": "employee:1",
+      "entity": "employee",
+      "label": "Employee",
+      "sql_id": 1,
+      "name": "Rahul",
+      "department": "Frontend",
+      "role": "Engineer"
+    },
+    {
+      "node_id": "employee:2",
+      "entity": "employee",
+      "label": "Employee",
+      "sql_id": 2,
+      "name": "Ananya",
+      "department": "Backend",
+      "role": "Engineer"
+    },
+    {
+      "node_id": "employee:3",
+      "entity": "employee",
+      "label": "Employee",
+      "sql_id": 3,
+      "name": "Priya",
+      "department": "AI",
+      "role": "Manager"
+    },
+    {
+      "node_id": "employee:4",
+      "entity": "employee",
+      "label": "Employee",
+      "sql_id": 4,
+      "name": "Vikram",
+      "department": "DevOps",
+      "role": "Engineer"
+    },
+    {
+      "node_id": "project:1",
+      "entity": "project",
+      "label": "Project",
+      "sql_id": 1,
+      "project_name": "Fraud Detection"
+    },
+    {
+      "node_id": "project:2",
+      "entity": "project",
+      "label": "Project",
+      "sql_id": 2,
+      "project_name": "Recommendation Engine"
+    },
+    {
+      "node_id": "project:3",
+      "entity": "project",
+      "label": "Project",
+      "sql_id": 3,
+      "project_name": "Customer Support Chatbot"
+    }
+  ],
+  "edges": [
+    {
+      "source": "employee:1",
+      "target": "project:1",
+      "relation": "WORKS_ON"
+    },
+    {
+      "source": "employee:1",
+      "target": "project:2",
+      "relation": "WORKS_ON"
+    },
+    {
+      "source": "employee:2",
+      "target": "project:2",
+      "relation": "WORKS_ON"
+    },
+    {
+      "source": "employee:3",
+      "target": "project:1",
+      "relation": "WORKS_ON"
+    },
+    {
+      "source": "employee:3",
+      "target": "project:3",
+      "relation": "WORKS_ON"
+    },
+    {
+      "source": "employee:4",
+      "target": "project:3",
+      "relation": "WORKS_ON"
+    }
+  ]
+}

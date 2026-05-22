@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+employees.db
+graph_visualization.html
+lib/
+.venv/
