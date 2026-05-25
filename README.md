@@ -1,193 +1,112 @@
-# SQL ↔ Knowledge Graph Sync — Local MVP
+# SQL <-> Knowledge Graph Sync — Local MVP
 
-Tests the core concept: **can graph node edits reflect back into a SQL database?**
+This project now runs a richer local knowledge graph on top of SQLite and a JSON-backed NetworkX graph. Changes on either side can be reflected to the other side, and a live watcher keeps them in sync in real time.
 
-```
-SQLite  ──push──▶  Local NetworkX Graph JSON
-        ◀──sync──
-```
+## What is in the graph
 
----
+The graph now includes:
 
-## 1. Prerequisites
+- Departments with sub-department hierarchy
+- Teams linked to departments
+- Employees linked to teams and managers
+- Projects owned by teams and linked by dependencies
+- Skills with prerequisite relationships
+- Employee-to-skill and employee-to-project links
 
-### Python packages
+That gives you multiple parent-child branches and many-to-many relationships instead of a flat employee/project sample.
+
+## Install
+
 ```bash
 pip install -r requirements.txt
 ```
 
-No external graph database is required. The graph is stored locally in JSON files.
-The visualization command generates a local HTML file with an interactive graph.
-
----
-
-## 2. Config  (`config.py`)
-
-```python
-SQLITE_PATH    = "employees.db"
-GRAPH_PATH     = "graph_state.json"
-SNAPSHOT_PATH  = "graph_snapshot.json"
-```
-
----
-
-## 3. First-Time Setup
+## First run
 
 ```bash
 python main.py init
 ```
 
-This:
-- Creates `employees.db` with 4 employees, 2 projects, 4 assignments
-- Pushes everything to `graph_state.json` as nodes + relationships
-- Saves `graph_snapshot.json` as a baseline
+This creates and seeds the SQLite database, exports the graph to `graph_state.json`, and writes a baseline snapshot to `graph_snapshot.json`.
 
----
+## Live sync
 
-## 4. Explore the Graph
-
-Open `graph_state.json` in VS Code.
-
-The graph is just JSON, for example:
-
-```json
-{
-  "nodes": [
-    {
-      "node_id": "employee:1",
-      "entity": "employee",
-      "sql_id": 1,
-      "name": "Rahul",
-      "department": "AI",
-      "role": "Engineer"
-    }
-  ],
-  "edges": [
-    {
-      "source": "employee:1",
-      "target": "project:1",
-      "relation": "WORKS_ON"
-    }
-  ]
-}
-```
-
----
-
-## 5. Edit a Node in the Graph
-
-Change node properties directly in `graph_state.json`, or use the CLI:
+Run the watcher in one terminal:
 
 ```bash
-python main.py set employee 1 department Research
+python main.py watch
 ```
 
-If you prefer manual editing, the JSON shape still looks like this:
+Then edit either side:
 
-```json
-{
-  "node_id": "employee:1",
-  "entity": "employee",
-  "sql_id": 1,
-  "name": "Rahul",
-  "department": "Research",
-  "role": "Engineer"
-}
-```
+- Change `graph_state.json` directly, or use `python main.py set ...`, `link`, and `unlink`
+- Update the SQLite database from another tool or script
 
-You can also add or remove entries in `edges` to change relationships.
+The watcher will push graph changes into SQLite and refresh the graph when SQLite changes.
 
-To visualize the graph network locally, run:
+## SQL change script
+
+If you want to update SQLite directly from the terminal, run `sql_change.py` from the project folder:
 
 ```bash
-python main.py viz
+python sql_change.py --sql "UPDATE employees SET role = 'Principal Engineer' WHERE id = 3"
 ```
 
-This writes `graph_visualization.html`, which you can open in a browser.
-
----
-
-## 6. Sync Changes Back to SQL
+Add `--sync-graph` if you want the graph files refreshed immediately after the SQL change:
 
 ```bash
-python main.py sync
+python sql_change.py --sql "UPDATE employees SET role = 'Principal Engineer' WHERE id = 3" --sync-graph
 ```
 
-Output:
-```
-📡  Reading current local graph state …
-⚖️   Diffing old vs new …
-🛠️   Applying 1 change(s) to SQLite …
-
-   📝  UPDATE employees  id=1  →  {'department': 'Research'}
-
-✅  1 SQL operation(s) committed to employees.db
-```
-
----
-
-## 7. Verify SQL Updated
-
-```bash
-python main.py status
-```
-
-```
-┌─ employees ────────────────────────────────────────
-  id   name         department     role
-  ──────────────────────────────────────────
-  1    Rahul        Research       Engineer   ← changed!
-  2    Ananya       Backend        Engineer
-  3    Priya        AI             Manager
-  4    Vikram       DevOps         Engineer
-```
-
----
-
-## 8. Refresh Snapshot
-
-After syncing, update the baseline so the next diff is accurate:
+To check SQL -> graph parity, run:
 
 ```bash
 python main.py push
 ```
 
----
+That command rebuilds `graph_state.json` from the current SQLite database.
 
-## Full Workflow (repeat)
+## Useful commands
 
-```
-edit graph_state.json  →  python main.py sync  →  python main.py status  →  python main.py push
-```
-
-Or, for a quick node tweak:
-
-```
-python main.py set employee 1 department Research
+```bash
+python main.py status
+python main.py viz
+python main.py set employee 3 role Staff Engineer
+python main.py link employee 3 skill 4 HAS_SKILL
+python main.py unlink employee 3 skill 4 HAS_SKILL
 python main.py sync
+python main.py push
+python sql_change.py --sql "UPDATE employees SET role = 'Principal Engineer' WHERE id = 3" --sync-graph
 ```
 
----
+## Visualize the graph
 
-## What the Diff Engine Catches
+Run:
 
-| Graph Change                        | SQL Operation                        |
-|-------------------------------------|--------------------------------------|
-| Edit node property (e.g. department)| `UPDATE employees SET …`             |
-| Delete a node                       | `DELETE FROM employees …`            |
-| Add a new node                      | `INSERT INTO employees …`            |
-| Remove a WORKS_ON relationship      | `DELETE FROM employee_projects …`    |
-| Add a WORKS_ON relationship         | `INSERT INTO employee_projects …`    |
+```bash
+python main.py viz
+```
 
----
+This generates `graph_visualization.html`, an interactive local view you can open in a browser.
+
+Hovering over a node shows the node metadata plus the metadata of the nodes it connects to and receives connections from.
+
+## Testing the loop
+
+1. Run `python main.py init`
+2. Start `python main.py watch`
+3. Edit a graph node or edge
+4. Check `python main.py status`
+5. Change a table in SQLite from a script or editor
+6. Wait for the watcher to refresh the graph
+
+When you change a node or an edge, the console now logs the node fields that changed and the connected nodes that are affected.
 
 ## Files
 
-```
-config.py         — local file paths
-setup_db.py       — creates & seeds SQLite
-graph_utils.py    — NetworkX helpers for local graph storage
-sql_to_graph.py   — SQL → NetworkX push + snapshot
-graph_to_sql.py   — graph diff → SQL sync
-main.py           — CLI entry point
-```
+- `setup_db.py` creates and seeds the richer SQLite schema
+- `sql_to_graph.py` exports the database into the graph
+- `graph_to_sql.py` applies the graph state back to SQLite
+- `live_sync.py` runs the real-time bidirectional watcher
+- `graph_utils.py` stores, loads, edits, and visualizes the graph
+- `main.py` provides the CLI entry point

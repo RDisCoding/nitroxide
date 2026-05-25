@@ -1,203 +1,265 @@
 # ─────────────────────────────────────────────
-#  graph_to_sql.py  —  local NetworkX graph → SQL  (sync back)
+#  graph_to_sql.py  —  local NetworkX graph → SQL
 #
-#  1. Loads the JSON snapshot saved by sql_to_graph.py
-#  2. Reads the CURRENT state of the local graph file
-#  3. Diffs old vs new
-#  4. Generates & executes SQL UPDATE / INSERT / DELETE
+#  Applies the current graph state to SQLite so the
+#  database mirrors the knowledge graph in real time.
 # ─────────────────────────────────────────────
 
 import sqlite3
 
-from config import GRAPH_PATH, SQLITE_PATH, SNAPSHOT_PATH
-from graph_utils import graph_to_state, load_graph
+from config import GRAPH_PATH, SNAPSHOT_PATH, SQLITE_PATH
+from graph_utils import load_graph, log_graph_delta, save_graph
 
-
-# ── editable fields per entity ───────────────────────────────────────────────
-EMPLOYEE_FIELDS = ["name", "department", "role"]
-PROJECT_FIELDS  = ["project_name"]
-
-
-# ── load snapshot ────────────────────────────────────────────────────────────
 
 def _load_graph(path):
     try:
         return load_graph(path)
     except FileNotFoundError:
         raise SystemExit(
-            f"❌  Graph file not found. Run  python main.py push  first to create {path}."
+            f"Graph file not found. Run python main.py push first to create {path}."
         )
 
 
-# ── read current graph state ────────────────────────────────────────────────
-
-def _read_graph(path):
-    graph = _load_graph(path)
-    return graph_to_state(graph)
-
-
-# ── diff helpers ──────────────────────────────────────────────────────────────
-
-def _diff_employees(old_map, new_map):
-    updates  = []   # (sql_id, {field: new_value})
-    inserts  = []   # new employees added in graph
-    deletes  = []   # employees removed from graph
-
-    for sql_id, new_node in new_map.items():
-        if sql_id not in old_map:
-            inserts.append(new_node)
-        else:
-            old_node = old_map[sql_id]
-            changes  = {f: new_node[f] for f in EMPLOYEE_FIELDS if new_node.get(f) != old_node.get(f)}
-            if changes:
-                updates.append((sql_id, changes))
-
-    for sql_id in old_map:
-        if sql_id not in new_map:
-            deletes.append(sql_id)
-
-    return updates, inserts, deletes
+def _node_maps(graph):
+    nodes = {
+        "department": {},
+        "team": {},
+        "employee": {},
+        "project": {},
+        "skill": {},
+    }
+    for node_id, data in graph.nodes(data=True):
+        entity = data.get("entity")
+        sql_id = data.get("sql_id")
+        if entity in nodes:
+            nodes[entity][sql_id] = dict(data)
+    return nodes
 
 
-def _diff_projects(old_map, new_map):
-    updates = []
-    inserts = []
-    deletes = []
-
-    for sql_id, new_node in new_map.items():
-        if sql_id not in old_map:
-            inserts.append(new_node)
-        else:
-            old_node = old_map[sql_id]
-            changes  = {f: new_node[f] for f in PROJECT_FIELDS if new_node.get(f) != old_node.get(f)}
-            if changes:
-                updates.append((sql_id, changes))
-
-    for sql_id in old_map:
-        if sql_id not in new_map:
-            deletes.append(sql_id)
-
-    return updates, inserts, deletes
+def _relation_pairs(graph, relation, source_entity, target_entity):
+    pairs = set()
+    for source, target, data in graph.edges(data=True):
+        if data.get("relation") != relation:
+            continue
+        source_data = graph.nodes[source]
+        target_data = graph.nodes[target]
+        if source_data.get("entity") != source_entity or target_data.get("entity") != target_entity:
+            continue
+        pairs.add((source_data["sql_id"], target_data["sql_id"]))
+    return pairs
 
 
-def _diff_links(old_set, new_set):
-    added   = new_set - old_set
-    removed = old_set - new_set
-    return added, removed
+def _single_parent_map(graph, relation, parent_entity, child_entity):
+    mapping = {}
+    for source, target, data in graph.edges(data=True):
+        if data.get("relation") != relation:
+            continue
+        source_data = graph.nodes[source]
+        target_data = graph.nodes[target]
+        if source_data.get("entity") != parent_entity or target_data.get("entity") != child_entity:
+            continue
+        mapping[target_data["sql_id"]] = source_data["sql_id"]
+    return mapping
 
 
-# ── apply SQL changes ─────────────────────────────────────────────────────────
+def _direct_map(graph, relation, source_entity, target_entity):
+    mapping = {}
+    for source, target, data in graph.edges(data=True):
+        if data.get("relation") != relation:
+            continue
+        source_data = graph.nodes[source]
+        target_data = graph.nodes[target]
+        if source_data.get("entity") != source_entity or target_data.get("entity") != target_entity:
+            continue
+        mapping[source_data["sql_id"]] = target_data["sql_id"]
+    return mapping
 
-def _apply_sql(emp_updates, emp_inserts, emp_deletes,
-               proj_updates, proj_inserts, proj_deletes,
-               link_added, link_removed):
 
+def _reset_tables(cur):
+    cur.executescript(
+        """
+        DELETE FROM employee_projects;
+        DELETE FROM employee_skills;
+        DELETE FROM project_dependencies;
+        DELETE FROM skill_prerequisites;
+        DELETE FROM employees;
+        DELETE FROM projects;
+        DELETE FROM teams;
+        DELETE FROM departments;
+        DELETE FROM skills;
+        """
+    )
+
+
+def _apply_nodes(cur, nodes, department_parent, team_department, employee_team, employee_manager, project_owner):
+    for department in nodes["department"].values():
+        cur.execute(
+            "INSERT INTO departments (id, name, parent_department_id) VALUES (?,?,?)",
+            (department["sql_id"], department["name"], department_parent.get(department["sql_id"])),
+        )
+
+    for team in nodes["team"].values():
+        cur.execute(
+            "INSERT INTO teams (id, name, department_id) VALUES (?,?,?)",
+            (team["sql_id"], team["name"], team_department.get(team["sql_id"])),
+        )
+
+    for employee in nodes["employee"].values():
+        cur.execute(
+            "INSERT INTO employees (id, name, role, team_id, manager_id) VALUES (?,?,?,?,?)",
+            (
+                employee["sql_id"],
+                employee["name"],
+                employee["role"],
+                employee_team.get(employee["sql_id"]),
+                employee_manager.get(employee["sql_id"]),
+            ),
+        )
+
+    for project in nodes["project"].values():
+        cur.execute(
+            "INSERT INTO projects (id, project_name, owner_team_id) VALUES (?,?,?)",
+            (project["sql_id"], project["project_name"], project_owner.get(project["sql_id"])),
+        )
+
+    for skill in nodes["skill"].values():
+        cur.execute(
+            "INSERT INTO skills (id, skill_name) VALUES (?,?)",
+            (skill["sql_id"], skill["skill_name"]),
+        )
+
+
+def _apply_relation_columns(cur, graph):
+    department_parent = _single_parent_map(graph, "SUBDEPARTMENT_OF", "department", "department")
+    team_department = _single_parent_map(graph, "LOCATED_IN", "team", "department")
+    employee_team = _single_parent_map(graph, "MEMBER_OF", "employee", "team")
+    employee_manager = _single_parent_map(graph, "MANAGES", "employee", "employee")
+    project_owner = _single_parent_map(graph, "OWNS_PROJECT", "team", "project")
+
+    for department_id, parent_id in department_parent.items():
+        cur.execute(
+            "UPDATE departments SET parent_department_id = ? WHERE id = ?",
+            (parent_id, department_id),
+        )
+
+    for team_id, department_id in team_department.items():
+        cur.execute(
+            "UPDATE teams SET department_id = ? WHERE id = ?",
+            (department_id, team_id),
+        )
+
+    for employee_id, team_id in employee_team.items():
+        cur.execute(
+            "UPDATE employees SET team_id = ? WHERE id = ?",
+            (team_id, employee_id),
+        )
+
+    for employee_id, manager_id in employee_manager.items():
+        cur.execute(
+            "UPDATE employees SET manager_id = ? WHERE id = ?",
+            (manager_id, employee_id),
+        )
+
+    for project_id, team_id in project_owner.items():
+        cur.execute(
+            "UPDATE projects SET owner_team_id = ? WHERE id = ?",
+            (team_id, project_id),
+        )
+
+
+def _replace_relation_table(cur, table, rows, query):
+    cur.execute(f"DELETE FROM {table}")
+    cur.executemany(query, rows)
+
+
+def _apply_relation_tables(cur, graph):
+    project_dependencies = _relation_pairs(graph, "DEPENDS_ON", "project", "project")
+    skill_prerequisites = _relation_pairs(graph, "PREREQUISITE_OF", "skill", "skill")
+    employee_skills = _relation_pairs(graph, "HAS_SKILL", "employee", "skill")
+    employee_projects = _relation_pairs(graph, "WORKS_ON", "employee", "project")
+
+    _replace_relation_table(
+        cur,
+        "project_dependencies",
+        sorted(project_dependencies),
+        "INSERT INTO project_dependencies (project_id, prerequisite_project_id) VALUES (?,?)",
+    )
+    _replace_relation_table(
+        cur,
+        "skill_prerequisites",
+        sorted(skill_prerequisites),
+        "INSERT INTO skill_prerequisites (skill_id, prerequisite_skill_id) VALUES (?,?)",
+    )
+    _replace_relation_table(
+        cur,
+        "employee_skills",
+        sorted(employee_skills),
+        "INSERT INTO employee_skills (emp_id, skill_id) VALUES (?,?)",
+    )
+    _replace_relation_table(
+        cur,
+        "employee_projects",
+        sorted(employee_projects),
+        "INSERT INTO employee_projects (emp_id, project_id) VALUES (?,?)",
+    )
+
+
+def _write_sql_from_graph(graph):
     conn = sqlite3.connect(SQLITE_PATH)
-    cur  = conn.cursor()
-    total = 0
+    conn.execute("PRAGMA foreign_keys = OFF")
+    cur = conn.cursor()
 
-    # ── employees ────────────────────────────────────────────────────────────
-    for sql_id, changes in emp_updates:
-        set_clause = ", ".join(f"{k} = ?" for k in changes)
-        values     = list(changes.values()) + [sql_id]
-        query      = f"UPDATE employees SET {set_clause} WHERE id = ?"
-        print(f"   UPDATE employees  id={sql_id} -> {changes}")
-        cur.execute(query, values)
-        total += 1
+    _reset_tables(cur)
+    nodes = _node_maps(graph)
+    department_parent = _single_parent_map(graph, "SUBDEPARTMENT_OF", "department", "department")
+    team_department = _direct_map(graph, "LOCATED_IN", "team", "department")
+    employee_team = _direct_map(graph, "MEMBER_OF", "employee", "team")
+    employee_manager = _single_parent_map(graph, "MANAGES", "employee", "employee")
+    project_owner = _single_parent_map(graph, "OWNS_PROJECT", "team", "project")
 
-    for node in emp_inserts:
-        print(f"   INSERT employee  {node}")
-        cur.execute(
-            "INSERT OR IGNORE INTO employees (id, name, department, role) VALUES (?,?,?,?)",
-            (node["sql_id"], node["name"], node["department"], node["role"]),
-        )
-        total += 1
-
-    for sql_id in emp_deletes:
-        print(f"   DELETE employee  id={sql_id}")
-        cur.execute("DELETE FROM employees WHERE id = ?", (sql_id,))
-        cur.execute("DELETE FROM employee_projects WHERE emp_id = ?", (sql_id,))
-        total += 1
-
-    # ── projects ─────────────────────────────────────────────────────────────
-    for sql_id, changes in proj_updates:
-        set_clause = ", ".join(f"{k} = ?" for k in changes)
-        values     = list(changes.values()) + [sql_id]
-        query      = f"UPDATE projects SET {set_clause} WHERE id = ?"
-        print(f"   UPDATE projects  id={sql_id} -> {changes}")
-        cur.execute(query, values)
-        total += 1
-
-    for node in proj_inserts:
-        print(f"   INSERT project  {node}")
-        cur.execute(
-            "INSERT OR IGNORE INTO projects (id, project_name) VALUES (?,?)",
-            (node["sql_id"], node["project_name"]),
-        )
-        total += 1
-
-    for sql_id in proj_deletes:
-        print(f"   DELETE project  id={sql_id}")
-        cur.execute("DELETE FROM projects WHERE id = ?", (sql_id,))
-        cur.execute("DELETE FROM employee_projects WHERE project_id = ?", (sql_id,))
-        total += 1
-
-    # ── relationships ─────────────────────────────────────────────────────────
-    for (emp_id, proj_id) in link_added:
-        print(f"   INSERT employee_projects  emp={emp_id} -> proj={proj_id}")
-        cur.execute(
-            "INSERT OR IGNORE INTO employee_projects VALUES (?,?)",
-            (emp_id, proj_id),
-        )
-        total += 1
-
-    for (emp_id, proj_id) in link_removed:
-        print(f"   DELETE employee_projects  emp={emp_id} -> proj={proj_id}")
-        cur.execute(
-            "DELETE FROM employee_projects WHERE emp_id=? AND project_id=?",
-            (emp_id, proj_id),
-        )
-        total += 1
+    _apply_nodes(
+        cur,
+        nodes,
+        department_parent,
+        team_department,
+        employee_team,
+        employee_manager,
+        project_owner,
+    )
+    _apply_relation_tables(cur, graph)
 
     conn.commit()
+    conn.execute("PRAGMA foreign_keys = ON")
     conn.close()
-    return total
 
-
-# ── main ─────────────────────────────────────────────────────────────────────
 
 def sync_to_sql():
-    print("\nLoading snapshot (baseline)...")
-    old_employees, old_projects, old_links = _read_graph(SNAPSHOT_PATH)
+    print("\nLoading graph snapshot baseline...")
+    snapshot_graph = _load_graph(SNAPSHOT_PATH)
+    current_graph = _load_graph(GRAPH_PATH)
 
-    print("Reading current local graph state...")
-    new_employees, new_projects, new_links = _read_graph(GRAPH_PATH)
+    log_graph_delta(snapshot_graph, current_graph, "Graph -> SQL sync")
 
-    print("\nDiffing old vs new...")
+    if snapshot_graph.number_of_nodes() == current_graph.number_of_nodes() and snapshot_graph.number_of_edges() == current_graph.number_of_edges():
+        same_snapshot = True
+        for node, data in snapshot_graph.nodes(data=True):
+            if node not in current_graph.nodes or current_graph.nodes[node] != data:
+                same_snapshot = False
+                break
+        if same_snapshot:
+            for source, target, data in snapshot_graph.edges(data=True):
+                if not current_graph.has_edge(source, target) or current_graph.get_edge_data(source, target) != data:
+                    same_snapshot = False
+                    break
+        if same_snapshot:
+            print("No graph changes detected. SQL is already in sync.\n")
+            return
 
-    emp_updates,  emp_inserts,  emp_deletes  = _diff_employees(old_employees, new_employees)
-    proj_updates, proj_inserts, proj_deletes = _diff_projects(old_projects,   new_projects)
-    link_added,   link_removed               = _diff_links(old_links, new_links)
-
-    total_changes = (
-        len(emp_updates)  + len(emp_inserts)  + len(emp_deletes)  +
-        len(proj_updates) + len(proj_inserts) + len(proj_deletes) +
-        len(link_added)   + len(link_removed)
-    )
-
-    if total_changes == 0:
-        print("No changes detected. SQL is already in sync with the graph.\n")
-        return
-
-    print(f"\nApplying {total_changes} change(s) to SQLite...\n")
-    applied = _apply_sql(
-        emp_updates,  emp_inserts,  emp_deletes,
-        proj_updates, proj_inserts, proj_deletes,
-        link_added,   link_removed,
-    )
-
-    print(f"\n{applied} SQL operation(s) committed to {SQLITE_PATH}\n")
-    print("   Run 'python main.py push' again to refresh the graph snapshot.\n")
+    print("Applying current graph state to SQLite...")
+    _write_sql_from_graph(current_graph)
+    save_graph(current_graph, SNAPSHOT_PATH)
+    print(f"Graph state applied to {SQLITE_PATH}")
+    print(f"Snapshot refreshed -> {SNAPSHOT_PATH}\n")
 
 
 if __name__ == "__main__":

@@ -1,64 +1,350 @@
 {
   "nodes": [
     {
+      "node_id": "department:1",
+      "entity": "department",
+      "label": "Department",
+      "sql_id": 1,
+      "name": "Engineering"
+    },
+    {
+      "node_id": "department:2",
+      "entity": "department",
+      "label": "Department",
+      "sql_id": 2,
+      "name": "Platform"
+    },
+    {
+      "node_id": "department:3",
+      "entity": "department",
+      "label": "Department",
+      "sql_id": 3,
+      "name": "Applications"
+    },
+    {
+      "node_id": "department:4",
+      "entity": "department",
+      "label": "Department",
+      "sql_id": 4,
+      "name": "AI Research"
+    },
+    {
+      "node_id": "department:5",
+      "entity": "department",
+      "label": "Department",
+      "sql_id": 5,
+      "name": "Security"
+    },
+    {
+      "node_id": "team:1",
+      "entity": "team",
+      "label": "Team",
+      "sql_id": 1,
+      "name": "Core Platform"
+    },
+    {
+      "node_id": "team:2",
+      "entity": "team",
+      "label": "Team",
+      "sql_id": 2,
+      "name": "DevOps"
+    },
+    {
+      "node_id": "team:3",
+      "entity": "team",
+      "label": "Team",
+      "sql_id": 3,
+      "name": "ML Research"
+    },
+    {
+      "node_id": "team:4",
+      "entity": "team",
+      "label": "Team",
+      "sql_id": 4,
+      "name": "Product Apps"
+    },
+    {
+      "node_id": "team:5",
+      "entity": "team",
+      "label": "Team",
+      "sql_id": 5,
+      "name": "Security Ops"
+    },
+    {
       "node_id": "employee:1",
       "entity": "employee",
       "label": "Employee",
       "sql_id": 1,
-      "name": "Rahul",
-      "department": "Frontend",
-      "role": "Engineer"
+      "name": "Nandita Ray",
+      "role": "Director"
     },
     {
       "node_id": "employee:2",
       "entity": "employee",
       "label": "Employee",
       "sql_id": 2,
-      "name": "Ananya",
-      "department": "Backend",
-      "role": "Engineer"
+      "name": "Priya Menon",
+      "role": "Engineering Manager"
     },
     {
       "node_id": "employee:3",
       "entity": "employee",
       "label": "Employee",
       "sql_id": 3,
-      "name": "Priya",
-      "department": "AI",
-      "role": "Manager"
+      "name": "Rahul Sharma",
+      "role": "Engineer"
     },
     {
       "node_id": "employee:4",
       "entity": "employee",
       "label": "Employee",
       "sql_id": 4,
-      "name": "Vikram",
-      "department": "DevOps",
+      "name": "Ananya Iyer",
       "role": "Engineer"
+    },
+    {
+      "node_id": "employee:5",
+      "entity": "employee",
+      "label": "Employee",
+      "sql_id": 5,
+      "name": "Vikram Rao",
+      "role": "DevOps Lead"
+    },
+    {
+      "node_id": "employee:6",
+      "entity": "employee",
+      "label": "Employee",
+      "sql_id": 6,
+      "name": "Sara Khan",
+      "role": "DevOps Engineer"
+    },
+    {
+      "node_id": "employee:8",
+      "entity": "employee",
+      "label": "Employee",
+      "sql_id": 8,
+      "name": "Arjun Das",
+      "role": "ML Engineer"
+    },
+    {
+      "node_id": "employee:9",
+      "entity": "employee",
+      "label": "Employee",
+      "sql_id": 9,
+      "name": "Imran Ali",
+      "role": "Security Manager"
+    },
+    {
+      "node_id": "employee:10",
+      "entity": "employee",
+      "label": "Employee",
+      "sql_id": 10,
+      "name": "Asha Patel",
+      "role": "Security Analyst"
     },
     {
       "node_id": "project:1",
       "entity": "project",
       "label": "Project",
       "sql_id": 1,
-      "project_name": "Fraud Detection"
+      "project_name": "Internal Graph Platform"
     },
     {
       "node_id": "project:2",
       "entity": "project",
       "label": "Project",
       "sql_id": 2,
-      "project_name": "Recommendation Engine"
+      "project_name": "Sync Engine"
     },
     {
       "node_id": "project:3",
       "entity": "project",
       "label": "Project",
       "sql_id": 3,
-      "project_name": "Customer Support Chatbot"
+      "project_name": "Employee Portal"
+    },
+    {
+      "node_id": "project:4",
+      "entity": "project",
+      "label": "Project",
+      "sql_id": 4,
+      "project_name": "Security Dashboard"
+    },
+    {
+      "node_id": "project:5",
+      "entity": "project",
+      "label": "Project",
+      "sql_id": 5,
+      "project_name": "Model Ops Toolkit"
+    },
+    {
+      "node_id": "project:6",
+      "entity": "project",
+      "label": "Project",
+      "sql_id": 6,
+      "project_name": "Onboarding Automation"
+    },
+    {
+      "node_id": "skill:1",
+      "entity": "skill",
+      "label": "Skill",
+      "sql_id": 1,
+      "skill_name": "SQL"
+    },
+    {
+      "node_id": "skill:2",
+      "entity": "skill",
+      "label": "Skill",
+      "sql_id": 2,
+      "skill_name": "Python"
+    },
+    {
+      "node_id": "skill:3",
+      "entity": "skill",
+      "label": "Skill",
+      "sql_id": 3,
+      "skill_name": "SQLite"
+    },
+    {
+      "node_id": "skill:4",
+      "entity": "skill",
+      "label": "Skill",
+      "sql_id": 4,
+      "skill_name": "NetworkX"
+    },
+    {
+      "node_id": "skill:5",
+      "entity": "skill",
+      "label": "Skill",
+      "sql_id": 5,
+      "skill_name": "Security Analysis"
+    },
+    {
+      "node_id": "skill:6",
+      "entity": "skill",
+      "label": "Skill",
+      "sql_id": 6,
+      "skill_name": "Project Planning"
+    },
+    {
+      "node_id": "skill:7",
+      "entity": "skill",
+      "label": "Skill",
+      "sql_id": 7,
+      "skill_name": "Data Modeling"
     }
   ],
   "edges": [
+    {
+      "source": "department:1",
+      "target": "department:2",
+      "relation": "SUBDEPARTMENT_OF"
+    },
+    {
+      "source": "department:1",
+      "target": "department:3",
+      "relation": "SUBDEPARTMENT_OF"
+    },
+    {
+      "source": "department:1",
+      "target": "department:4",
+      "relation": "SUBDEPARTMENT_OF"
+    },
+    {
+      "source": "department:1",
+      "target": "department:5",
+      "relation": "SUBDEPARTMENT_OF"
+    },
+    {
+      "source": "team:1",
+      "target": "department:2",
+      "relation": "LOCATED_IN"
+    },
+    {
+      "source": "team:1",
+      "target": "project:1",
+      "relation": "OWNS_PROJECT"
+    },
+    {
+      "source": "team:1",
+      "target": "project:2",
+      "relation": "OWNS_PROJECT"
+    },
+    {
+      "source": "team:2",
+      "target": "department:2",
+      "relation": "LOCATED_IN"
+    },
+    {
+      "source": "team:3",
+      "target": "department:4",
+      "relation": "LOCATED_IN"
+    },
+    {
+      "source": "team:3",
+      "target": "project:5",
+      "relation": "OWNS_PROJECT"
+    },
+    {
+      "source": "team:4",
+      "target": "department:3",
+      "relation": "LOCATED_IN"
+    },
+    {
+      "source": "team:4",
+      "target": "project:3",
+      "relation": "OWNS_PROJECT"
+    },
+    {
+      "source": "team:4",
+      "target": "project:6",
+      "relation": "OWNS_PROJECT"
+    },
+    {
+      "source": "team:5",
+      "target": "department:5",
+      "relation": "LOCATED_IN"
+    },
+    {
+      "source": "team:5",
+      "target": "project:4",
+      "relation": "OWNS_PROJECT"
+    },
+    {
+      "source": "employee:1",
+      "target": "team:1",
+      "relation": "MEMBER_OF"
+    },
+    {
+      "source": "employee:1",
+      "target": "employee:2",
+      "relation": "MANAGES"
+    },
+    {
+      "source": "employee:1",
+      "target": "employee:5",
+      "relation": "MANAGES"
+    },
+    {
+      "source": "employee:1",
+      "target": "employee:9",
+      "relation": "MANAGES"
+    },
+    {
+      "source": "employee:1",
+      "target": "skill:1",
+      "relation": "HAS_SKILL"
+    },
+    {
+      "source": "employee:1",
+      "target": "skill:2",
+      "relation": "HAS_SKILL"
+    },
+    {
+      "source": "employee:1",
+      "target": "skill:6",
+      "relation": "HAS_SKILL"
+    },
     {
       "source": "employee:1",
       "target": "project:1",
@@ -71,8 +357,63 @@
     },
     {
       "source": "employee:2",
+      "target": "team:1",
+      "relation": "MEMBER_OF"
+    },
+    {
+      "source": "employee:2",
+      "target": "employee:3",
+      "relation": "MANAGES"
+    },
+    {
+      "source": "employee:2",
+      "target": "employee:4",
+      "relation": "MANAGES"
+    },
+    {
+      "source": "employee:2",
+      "target": "skill:1",
+      "relation": "HAS_SKILL"
+    },
+    {
+      "source": "employee:2",
+      "target": "skill:6",
+      "relation": "HAS_SKILL"
+    },
+    {
+      "source": "employee:2",
+      "target": "project:1",
+      "relation": "WORKS_ON"
+    },
+    {
+      "source": "employee:2",
       "target": "project:2",
       "relation": "WORKS_ON"
+    },
+    {
+      "source": "employee:3",
+      "target": "team:1",
+      "relation": "MEMBER_OF"
+    },
+    {
+      "source": "employee:3",
+      "target": "skill:1",
+      "relation": "HAS_SKILL"
+    },
+    {
+      "source": "employee:3",
+      "target": "skill:2",
+      "relation": "HAS_SKILL"
+    },
+    {
+      "source": "employee:3",
+      "target": "skill:4",
+      "relation": "HAS_SKILL"
+    },
+    {
+      "source": "employee:3",
+      "target": "skill:7",
+      "relation": "HAS_SKILL"
     },
     {
       "source": "employee:3",
@@ -81,13 +422,233 @@
     },
     {
       "source": "employee:3",
-      "target": "project:3",
+      "target": "project:2",
       "relation": "WORKS_ON"
+    },
+    {
+      "source": "employee:4",
+      "target": "team:4",
+      "relation": "MEMBER_OF"
+    },
+    {
+      "source": "employee:4",
+      "target": "skill:1",
+      "relation": "HAS_SKILL"
+    },
+    {
+      "source": "employee:4",
+      "target": "skill:2",
+      "relation": "HAS_SKILL"
+    },
+    {
+      "source": "employee:4",
+      "target": "skill:7",
+      "relation": "HAS_SKILL"
     },
     {
       "source": "employee:4",
       "target": "project:3",
       "relation": "WORKS_ON"
+    },
+    {
+      "source": "employee:4",
+      "target": "project:6",
+      "relation": "WORKS_ON"
+    },
+    {
+      "source": "employee:5",
+      "target": "team:2",
+      "relation": "MEMBER_OF"
+    },
+    {
+      "source": "employee:5",
+      "target": "employee:6",
+      "relation": "MANAGES"
+    },
+    {
+      "source": "employee:5",
+      "target": "skill:1",
+      "relation": "HAS_SKILL"
+    },
+    {
+      "source": "employee:5",
+      "target": "skill:3",
+      "relation": "HAS_SKILL"
+    },
+    {
+      "source": "employee:5",
+      "target": "skill:6",
+      "relation": "HAS_SKILL"
+    },
+    {
+      "source": "employee:5",
+      "target": "project:1",
+      "relation": "WORKS_ON"
+    },
+    {
+      "source": "employee:5",
+      "target": "project:2",
+      "relation": "WORKS_ON"
+    },
+    {
+      "source": "employee:6",
+      "target": "team:2",
+      "relation": "MEMBER_OF"
+    },
+    {
+      "source": "employee:6",
+      "target": "skill:2",
+      "relation": "HAS_SKILL"
+    },
+    {
+      "source": "employee:6",
+      "target": "skill:3",
+      "relation": "HAS_SKILL"
+    },
+    {
+      "source": "employee:6",
+      "target": "project:2",
+      "relation": "WORKS_ON"
+    },
+    {
+      "source": "employee:6",
+      "target": "project:6",
+      "relation": "WORKS_ON"
+    },
+    {
+      "source": "employee:8",
+      "target": "team:3",
+      "relation": "MEMBER_OF"
+    },
+    {
+      "source": "employee:8",
+      "target": "skill:2",
+      "relation": "HAS_SKILL"
+    },
+    {
+      "source": "employee:8",
+      "target": "skill:4",
+      "relation": "HAS_SKILL"
+    },
+    {
+      "source": "employee:8",
+      "target": "project:5",
+      "relation": "WORKS_ON"
+    },
+    {
+      "source": "employee:9",
+      "target": "team:5",
+      "relation": "MEMBER_OF"
+    },
+    {
+      "source": "employee:9",
+      "target": "employee:10",
+      "relation": "MANAGES"
+    },
+    {
+      "source": "employee:9",
+      "target": "skill:1",
+      "relation": "HAS_SKILL"
+    },
+    {
+      "source": "employee:9",
+      "target": "skill:5",
+      "relation": "HAS_SKILL"
+    },
+    {
+      "source": "employee:9",
+      "target": "skill:7",
+      "relation": "HAS_SKILL"
+    },
+    {
+      "source": "employee:9",
+      "target": "project:4",
+      "relation": "WORKS_ON"
+    },
+    {
+      "source": "employee:10",
+      "target": "team:5",
+      "relation": "MEMBER_OF"
+    },
+    {
+      "source": "employee:10",
+      "target": "skill:1",
+      "relation": "HAS_SKILL"
+    },
+    {
+      "source": "employee:10",
+      "target": "skill:5",
+      "relation": "HAS_SKILL"
+    },
+    {
+      "source": "employee:10",
+      "target": "project:4",
+      "relation": "WORKS_ON"
+    },
+    {
+      "source": "project:2",
+      "target": "project:1",
+      "relation": "DEPENDS_ON"
+    },
+    {
+      "source": "project:3",
+      "target": "project:2",
+      "relation": "DEPENDS_ON"
+    },
+    {
+      "source": "project:3",
+      "target": "project:6",
+      "relation": "DEPENDS_ON"
+    },
+    {
+      "source": "project:4",
+      "target": "project:1",
+      "relation": "DEPENDS_ON"
+    },
+    {
+      "source": "project:5",
+      "target": "project:1",
+      "relation": "DEPENDS_ON"
+    },
+    {
+      "source": "project:6",
+      "target": "project:2",
+      "relation": "DEPENDS_ON"
+    },
+    {
+      "source": "project:6",
+      "target": "project:3",
+      "relation": "DEPENDS_ON"
+    },
+    {
+      "source": "skill:3",
+      "target": "skill:1",
+      "relation": "PREREQUISITE_OF"
+    },
+    {
+      "source": "skill:4",
+      "target": "skill:1",
+      "relation": "PREREQUISITE_OF"
+    },
+    {
+      "source": "skill:4",
+      "target": "skill:2",
+      "relation": "PREREQUISITE_OF"
+    },
+    {
+      "source": "skill:5",
+      "target": "skill:1",
+      "relation": "PREREQUISITE_OF"
+    },
+    {
+      "source": "skill:7",
+      "target": "skill:1",
+      "relation": "PREREQUISITE_OF"
+    },
+    {
+      "source": "skill:7",
+      "target": "skill:6",
+      "relation": "PREREQUISITE_OF"
     }
   ]
 }
