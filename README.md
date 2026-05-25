@@ -12,6 +12,7 @@ The graph now includes:
 - Projects owned by teams and linked by dependencies
 - Skills with prerequisite relationships
 - Employee-to-skill and employee-to-project links
+- A `description` field on every node, generated from the node's metadata and local graph context
 
 That gives you multiple parent-child branches and many-to-many relationships instead of a flat employee/project sample.
 
@@ -44,6 +45,24 @@ Then edit either side:
 
 The watcher will push graph changes into SQLite and refresh the graph when SQLite changes.
 
+## spaCy relation extraction
+
+Run the extractor to infer extra relations from the current graph:
+
+```bash
+python main.py extract
+```
+
+This uses spaCy to read node descriptions and infer relations from the text in those descriptions.
+
+The extractor prefers the installed `en_core_web_sm` model and falls back to a blank spaCy pipeline only if that model is unavailable.
+
+If you change the graph structure and want the descriptions refreshed, run:
+
+```bash
+python backfill_descriptions.py
+```
+
 ## SQL change script
 
 If you want to update SQLite directly from the terminal, run `sql_change.py` from the project folder:
@@ -74,6 +93,7 @@ python main.py viz
 python main.py set employee 3 role Staff Engineer
 python main.py link employee 3 skill 4 HAS_SKILL
 python main.py unlink employee 3 skill 4 HAS_SKILL
+python main.py extract
 python main.py sync
 python main.py push
 python sql_change.py --sql "UPDATE employees SET role = 'Principal Engineer' WHERE id = 3" --sync-graph

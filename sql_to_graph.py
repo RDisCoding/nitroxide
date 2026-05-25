@@ -9,7 +9,7 @@
 import sqlite3
 
 from config import GRAPH_PATH, SQLITE_PATH, SNAPSHOT_PATH
-from graph_utils import add_edge, log_graph_delta, load_graph, node_id, save_graph
+from graph_utils import add_edge, enrich_graph_descriptions, log_graph_delta, load_graph, node_id, save_graph
 from networkx import DiGraph
 
 
@@ -31,6 +31,7 @@ def _read_sqlite():
     employee_skills = _read_table(cur, "SELECT * FROM employee_skills ORDER BY emp_id, skill_id")
     project_dependencies = _read_table(cur, "SELECT * FROM project_dependencies ORDER BY project_id, prerequisite_project_id")
     skill_prerequisites = _read_table(cur, "SELECT * FROM skill_prerequisites ORDER BY skill_id, prerequisite_skill_id")
+    inferred_relations = _read_table(cur, "SELECT * FROM inferred_relations ORDER BY source_node, target_node, relation")
 
     conn.close()
     return {
@@ -43,6 +44,7 @@ def _read_sqlite():
         "employee_skills": employee_skills,
         "project_dependencies": project_dependencies,
         "skill_prerequisites": skill_prerequisites,
+        "inferred_relations": inferred_relations,
     }
 
 
@@ -167,6 +169,15 @@ def _build_graph(data):
             "WORKS_ON",
         )
 
+    for row in data["inferred_relations"]:
+        graph.add_edge(
+            row["source_node"],
+            row["target_node"],
+            relation=row["relation"],
+            evidence=row["evidence"],
+        )
+
+    enrich_graph_descriptions(graph)
     return graph
 
 

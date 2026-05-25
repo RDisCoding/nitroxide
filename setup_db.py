@@ -99,6 +99,14 @@ def setup():
             FOREIGN KEY (emp_id) REFERENCES employees(id),
             FOREIGN KEY (project_id) REFERENCES projects(id)
         );
+
+        CREATE TABLE IF NOT EXISTS inferred_relations (
+            source_node TEXT    NOT NULL,
+            target_node TEXT    NOT NULL,
+            relation    TEXT    NOT NULL,
+            evidence    TEXT    NOT NULL,
+            PRIMARY KEY (source_node, target_node, relation)
+        );
         """
     )
 
@@ -230,6 +238,8 @@ def setup():
             (10, 4),
         ],
     )
+
+    cur.execute("DELETE FROM inferred_relations")
 
     conn.commit()
     conn.close()

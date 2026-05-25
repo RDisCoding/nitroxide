@@ -28,6 +28,7 @@ Extra commands
     python main.py set employee 1 department Research
     python main.py link employee 3 project 2 WORKS_ON
     python main.py unlink employee 3 project 2 WORKS_ON
+    python main.py extract
     python main.py viz
     python main.py sync
     python main.py push
@@ -85,6 +86,11 @@ def show_status():
         "SELECT e.name AS employee, p.project_name AS project FROM employee_projects ep JOIN employees e ON ep.emp_id = e.id JOIN projects p ON ep.project_id = p.id ORDER BY e.name, p.project_name",
         lambda r: f"  {r['employee']:<20} -> {r['project']}",
     )
+    print_rows(
+        "Inferred relations",
+        "SELECT source_node, target_node, relation, evidence FROM inferred_relations ORDER BY relation, source_node, target_node",
+        lambda r: f"  {r['relation']:<18} {r['source_node']:<20} -> {r['target_node']:<20} | {r['evidence']}",
+    )
 
     print()
     conn.close()
@@ -104,6 +110,18 @@ def link_graph_nodes(source_entity, source_id, target_entity, target_id, relatio
     add_edge(graph, node_id(source_entity, source_id), node_id(target_entity, target_id), relation)
     save_graph(graph, GRAPH_PATH)
     print(f"Linked {source_entity}:{source_id} -> {target_entity}:{target_id} [{relation}]")
+
+
+def _get_cli_flag(flag_name, default=None):
+    if flag_name not in sys.argv:
+        return default
+    index = sys.argv.index(flag_name)
+    if index + 1 >= len(sys.argv):
+        return default
+    value = sys.argv[index + 1]
+    if value.startswith("--"):
+        return default
+    return value
 
 
 def unlink_graph_nodes(source_entity, source_id, target_entity, target_id, relation=None):
@@ -179,6 +197,13 @@ def main():
         from live_sync import run_watch
 
         run_watch()
+
+    elif cmd in ("extract", "extract-relations", "enrich"):
+        from relation_extractor import enrich_relations
+
+        text_dir = _get_cli_flag("--text-dir")
+        bootstrap = "--bootstrap" in sys.argv
+        enrich_relations(text_dir=text_dir, bootstrap=bootstrap)
 
     elif cmd == "init":
         from setup_db    import setup

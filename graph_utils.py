@@ -34,6 +34,127 @@ def _node_label(data):
     return data.get("name") or data.get("project_name") or data.get("skill_name") or data.get("label") or data.get("entity") or "node"
 
 
+def _unique_text(values):
+    seen = []
+    for value in values:
+        if not value:
+            continue
+        if value not in seen:
+            seen.append(value)
+    return seen
+
+
+def build_node_description(graph, node):
+    data = graph.nodes[node]
+    entity = data.get("entity") or str(node).split(":", 1)[0]
+    label = _node_label(data)
+
+    if label == "node" and isinstance(node, str):
+        label = node
+
+    if entity == "department":
+        teams = [
+            _node_label(graph.nodes[target])
+            for source, target, edge_data in graph.in_edges(node, data=True)
+            if edge_data.get("relation") == "LOCATED_IN" and graph.nodes[source].get("entity") == "team"
+        ]
+        teams = _unique_text(teams)
+        if teams:
+            return f"{label} is a department that contains the teams {', '.join(teams[:4])}."
+        return f"{label} is a department."
+
+    if entity == "team":
+        departments = [
+            _node_label(graph.nodes[target])
+            for source, target, edge_data in graph.out_edges(node, data=True)
+            if edge_data.get("relation") == "LOCATED_IN" and graph.nodes[target].get("entity") == "department"
+        ]
+        projects = [
+            _node_label(graph.nodes[target])
+            for source, target, edge_data in graph.out_edges(node, data=True)
+            if edge_data.get("relation") == "OWNS_PROJECT" and graph.nodes[target].get("entity") == "project"
+        ]
+        parts = [f"{label} is a team."]
+        if departments:
+            parts.append(f"It is located in the {departments[0]} department.")
+        if projects:
+            parts.append(f"It owns the projects {', '.join(_unique_text(projects)[:4])}.")
+        return " ".join(parts)
+
+    if entity == "employee":
+        team_names = [
+            _node_label(graph.nodes[target])
+            for source, target, edge_data in graph.out_edges(node, data=True)
+            if edge_data.get("relation") == "MEMBER_OF" and graph.nodes[target].get("entity") == "team"
+        ]
+        project_names = [
+            _node_label(graph.nodes[target])
+            for source, target, edge_data in graph.out_edges(node, data=True)
+            if edge_data.get("relation") == "WORKS_ON" and graph.nodes[target].get("entity") == "project"
+        ]
+        skill_names = [
+            _node_label(graph.nodes[target])
+            for source, target, edge_data in graph.out_edges(node, data=True)
+            if edge_data.get("relation") == "HAS_SKILL" and graph.nodes[target].get("entity") == "skill"
+        ]
+        manager_names = [
+            _node_label(graph.nodes[source])
+            for source, target, edge_data in graph.in_edges(node, data=True)
+            if edge_data.get("relation") == "MANAGES" and graph.nodes[source].get("entity") == "employee"
+        ]
+        parts = []
+        if data.get("role"):
+            parts.append(f"{label} is a {data['role']}.")
+        else:
+            parts.append(f"{label} is an employee.")
+        if team_names:
+            parts.append(f"They are on the {team_names[0]} team.")
+        if project_names:
+            parts.append(f"They work on {', '.join(_unique_text(project_names)[:4])}.")
+        if skill_names:
+            parts.append(f"They have skills in {', '.join(_unique_text(skill_names)[:5])}.")
+        if manager_names:
+            parts.append(f"They report to {manager_names[0]}.")
+        return " ".join(parts)
+
+    if entity == "project":
+        owner_teams = [
+            _node_label(graph.nodes[source])
+            for source, target, edge_data in graph.in_edges(node, data=True)
+            if edge_data.get("relation") == "OWNS_PROJECT" and graph.nodes[source].get("entity") == "team"
+        ]
+        dependencies = [
+            _node_label(graph.nodes[target])
+            for source, target, edge_data in graph.out_edges(node, data=True)
+            if edge_data.get("relation") == "DEPENDS_ON" and graph.nodes[target].get("entity") == "project"
+        ]
+        parts = [f"{label} is a project."]
+        if owner_teams:
+            parts.append(f"It is owned by the {owner_teams[0]} team.")
+        if dependencies:
+            parts.append(f"It depends on {', '.join(_unique_text(dependencies)[:4])}.")
+        return " ".join(parts)
+
+    if entity == "skill":
+        prereqs = [
+            _node_label(graph.nodes[target])
+            for source, target, edge_data in graph.out_edges(node, data=True)
+            if edge_data.get("relation") == "PREREQUISITE_OF" and graph.nodes[target].get("entity") == "skill"
+        ]
+        parts = [f"{label} is a skill."]
+        if prereqs:
+            parts.append(f"It is a prerequisite for {', '.join(_unique_text(prereqs)[:4])}.")
+        return " ".join(parts)
+
+    return f"{label} is a {entity or 'node'}."
+
+
+def enrich_graph_descriptions(graph):
+    for node, data in graph.nodes(data=True):
+        data["description"] = build_node_description(graph, node)
+    return graph
+
+
 def _format_attr_lines(data, ignore_keys=None):
     ignore = set(ignore_keys or ())
     lines = []
@@ -194,6 +315,7 @@ def build_graph(employees, projects, links):
             relation="WORKS_ON",
         )
 
+    enrich_graph_descriptions(graph)
     return graph
 
 

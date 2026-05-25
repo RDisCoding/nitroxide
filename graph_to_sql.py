@@ -10,6 +10,8 @@ import sqlite3
 from config import GRAPH_PATH, SNAPSHOT_PATH, SQLITE_PATH
 from graph_utils import load_graph, log_graph_delta, save_graph
 
+INFERRED_RELATIONS = {"COLLABORATES_WITH", "TEAMMATE_OF", "SHARES_SKILL", "SHARES_PROJECT"}
+
 
 def _load_graph(path):
     try:
@@ -172,6 +174,23 @@ def _replace_relation_table(cur, table, rows, query):
     cur.executemany(query, rows)
 
 
+def _apply_inferred_relations(cur, graph):
+    inferred_rows = []
+    for source, target, data in graph.edges(data=True):
+        relation = data.get("relation")
+        if relation not in INFERRED_RELATIONS:
+            continue
+        evidence = data.get("evidence", "spaCy-inferred relation")
+        inferred_rows.append((source, target, relation, evidence))
+
+    _replace_relation_table(
+        cur,
+        "inferred_relations",
+        inferred_rows,
+        "INSERT INTO inferred_relations (source_node, target_node, relation, evidence) VALUES (?,?,?,?)",
+    )
+
+
 def _apply_relation_tables(cur, graph):
     project_dependencies = _relation_pairs(graph, "DEPENDS_ON", "project", "project")
     skill_prerequisites = _relation_pairs(graph, "PREREQUISITE_OF", "skill", "skill")
@@ -227,6 +246,7 @@ def _write_sql_from_graph(graph):
         project_owner,
     )
     _apply_relation_tables(cur, graph)
+    _apply_inferred_relations(cur, graph)
 
     conn.commit()
     conn.execute("PRAGMA foreign_keys = ON")
