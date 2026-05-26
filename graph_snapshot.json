@@ -331,9 +331,9 @@
     {
       "source": "employee:1",
       "target": "employee:5",
-      "relation": "SHARES_PROJECT",
-      "evidence": "Nandita Ray, Rahul Sharma, Vikram Rao share the project Internal Graph Platform.",
-      "extracted_by": "spaCy"
+      "relation": "SHARES_SKILL",
+      "evidence": "Rahul Sharma and Ananya Iyer both have skill SQL.\nVikram Rao and Ananya Iyer both have skill SQL.\nNandita Ray and Rahul Sharma both have skill Python.",
+      "extracted_by": "llm"
     },
     {
       "source": "employee:1",
@@ -358,7 +358,9 @@
     {
       "source": "employee:1",
       "target": "project:1",
-      "relation": "WORKS_ON"
+      "relation": "WORKS_ON",
+      "evidence": "Nandita Ray works on Internal Graph Platform.",
+      "extracted_by": "spacy"
     },
     {
       "source": "employee:1",
@@ -368,30 +370,30 @@
     {
       "source": "employee:1",
       "target": "employee:3",
-      "relation": "SHARES_PROJECT",
-      "evidence": "Nandita Ray, Rahul Sharma, Vikram Rao share the project Internal Graph Platform.",
-      "extracted_by": "spaCy"
+      "relation": "TEAMMATE_OF",
+      "evidence": "Rahul Sharma and Nandita Ray are teammates on the Core Platform team.",
+      "extracted_by": "llm"
     },
     {
       "source": "employee:1",
       "target": "employee:6",
       "relation": "SHARES_PROJECT",
       "evidence": "Nandita Ray, Rahul Sharma, Vikram Rao, Sara Khan share the project Sync Engine.",
-      "extracted_by": "spaCy"
+      "extracted_by": "llm"
     },
     {
       "source": "employee:1",
       "target": "employee:4",
       "relation": "SHARES_SKILL",
       "evidence": "Nandita Ray, Rahul Sharma, Ananya Iyer, Vikram Rao share the skill SQL.",
-      "extracted_by": "spaCy"
+      "extracted_by": "llm"
     },
     {
       "source": "employee:1",
       "target": "employee:8",
       "relation": "SHARES_SKILL",
       "evidence": "Nandita Ray, Rahul Sharma, Ananya Iyer, Sara Khan, Arjun Das share the skill Python.",
-      "extracted_by": "spaCy"
+      "extracted_by": "llm"
     },
     {
       "source": "employee:3",
@@ -421,40 +423,51 @@
     {
       "source": "employee:3",
       "target": "project:1",
-      "relation": "WORKS_ON"
+      "relation": "WORKS_ON",
+      "evidence": "Rahul Sharma works on Internal Graph Platform.",
+      "extracted_by": "spacy"
     },
     {
       "source": "employee:3",
       "target": "project:2",
-      "relation": "WORKS_ON"
+      "relation": "WORKS_ON",
+      "evidence": "Rahul Sharma and Vikram Rao share the skill SQL.\nAnanya Iyer and Sara Khan worked on the Sync Engine.",
+      "extracted_by": "spacy"
     },
     {
       "source": "employee:3",
       "target": "employee:5",
-      "relation": "SHARES_PROJECT",
-      "evidence": "Nandita Ray, Rahul Sharma, Vikram Rao share the project Internal Graph Platform.",
-      "extracted_by": "spaCy"
+      "relation": "SHARES_SKILL",
+      "evidence": "Rahul Sharma and Ananya Iyer both have skill SQL.\nVikram Rao and Ananya Iyer both have skill SQL.\nNandita Ray and Rahul Sharma both have skill Python.",
+      "extracted_by": "llm"
     },
     {
       "source": "employee:3",
       "target": "employee:6",
       "relation": "SHARES_PROJECT",
       "evidence": "Nandita Ray, Rahul Sharma, Vikram Rao, Sara Khan share the project Sync Engine.",
-      "extracted_by": "spaCy"
+      "extracted_by": "llm"
     },
     {
       "source": "employee:3",
       "target": "employee:4",
-      "relation": "SHARES_SKILL",
-      "evidence": "Nandita Ray, Rahul Sharma, Ananya Iyer, Vikram Rao share the skill SQL.",
-      "extracted_by": "spaCy"
+      "relation": "SHARES_PROJECT",
+      "evidence": "Rahul Sharma and Vikram Rao share the skill SQL.\nAnanya Iyer and Sara Khan worked on the Sync Engine.",
+      "extracted_by": "llm"
     },
     {
       "source": "employee:3",
       "target": "employee:8",
       "relation": "SHARES_SKILL",
       "evidence": "Nandita Ray, Rahul Sharma, Ananya Iyer, Sara Khan, Arjun Das share the skill Python.",
-      "extracted_by": "spaCy"
+      "extracted_by": "llm"
+    },
+    {
+      "source": "employee:3",
+      "target": "employee:1",
+      "relation": "TEAMMATE_OF",
+      "evidence": "They are on the Core Platform team.",
+      "extracted_by": "llm"
     },
     {
       "source": "employee:4",
@@ -479,7 +492,9 @@
     {
       "source": "employee:4",
       "target": "project:3",
-      "relation": "WORKS_ON"
+      "relation": "WORKS_ON",
+      "evidence": "Ananya Iyer and her Product Apps teammates work together on Employee Portal.",
+      "extracted_by": "spacy"
     },
     {
       "source": "employee:4",
@@ -491,21 +506,42 @@
       "target": "employee:6",
       "relation": "SHARES_PROJECT",
       "evidence": "Ananya Iyer, Sara Khan share the project Onboarding Automation.",
-      "extracted_by": "spaCy"
+      "extracted_by": "llm"
     },
     {
       "source": "employee:4",
       "target": "employee:5",
-      "relation": "SHARES_SKILL",
-      "evidence": "Nandita Ray, Rahul Sharma, Ananya Iyer, Vikram Rao share the skill SQL.",
-      "extracted_by": "spaCy"
+      "relation": "SHARES_PROJECT",
+      "evidence": "Rahul Sharma and Vikram Rao share the skill SQL.\nAnanya Iyer and Sara Khan worked on the Sync Engine.",
+      "extracted_by": "llm"
     },
     {
       "source": "employee:4",
       "target": "employee:8",
       "relation": "SHARES_SKILL",
       "evidence": "Nandita Ray, Rahul Sharma, Ananya Iyer, Sara Khan, Arjun Das share the skill Python.",
-      "extracted_by": "spaCy"
+      "extracted_by": "llm"
+    },
+    {
+      "source": "employee:4",
+      "target": "employee:1",
+      "relation": "TEAMMATE_OF",
+      "evidence": "They are on the Product Apps team.",
+      "extracted_by": "llm"
+    },
+    {
+      "source": "employee:4",
+      "target": "employee:3",
+      "relation": "TEAMMATE_OF",
+      "evidence": "They are on the Product Apps team.",
+      "extracted_by": "llm"
+    },
+    {
+      "source": "employee:4",
+      "target": "project:2",
+      "relation": "WORKS_ON",
+      "evidence": "Rahul Sharma and Vikram Rao share the skill SQL.\nAnanya Iyer and Sara Khan worked on the Sync Engine.",
+      "extracted_by": "spacy"
     },
     {
       "source": "employee:5",
@@ -517,7 +553,7 @@
       "target": "employee:6",
       "relation": "SHARES_PROJECT",
       "evidence": "Nandita Ray, Rahul Sharma, Vikram Rao, Sara Khan share the project Sync Engine.",
-      "extracted_by": "spaCy"
+      "extracted_by": "llm"
     },
     {
       "source": "employee:5",
@@ -537,12 +573,30 @@
     {
       "source": "employee:5",
       "target": "project:1",
-      "relation": "WORKS_ON"
+      "relation": "WORKS_ON",
+      "evidence": "Vikram Rao works on Internal Graph Platform.",
+      "extracted_by": "spacy"
     },
     {
       "source": "employee:5",
       "target": "project:2",
-      "relation": "WORKS_ON"
+      "relation": "WORKS_ON",
+      "evidence": "Rahul Sharma and Vikram Rao share the skill SQL.\nAnanya Iyer and Sara Khan worked on the Sync Engine.",
+      "extracted_by": "spacy"
+    },
+    {
+      "source": "employee:5",
+      "target": "employee:1",
+      "relation": "TEAMMATE_OF",
+      "evidence": "They are on the DevOps team.",
+      "extracted_by": "llm"
+    },
+    {
+      "source": "employee:5",
+      "target": "employee:3",
+      "relation": "TEAMMATE_OF",
+      "evidence": "They are on the DevOps team.",
+      "extracted_by": "llm"
     },
     {
       "source": "employee:6",
@@ -562,7 +616,9 @@
     {
       "source": "employee:6",
       "target": "project:2",
-      "relation": "WORKS_ON"
+      "relation": "WORKS_ON",
+      "evidence": "Rahul Sharma and Vikram Rao share the skill SQL.\nAnanya Iyer and Sara Khan worked on the Sync Engine.",
+      "extracted_by": "spacy"
     },
     {
       "source": "employee:6",
@@ -574,7 +630,28 @@
       "target": "employee:8",
       "relation": "SHARES_SKILL",
       "evidence": "Nandita Ray, Rahul Sharma, Ananya Iyer, Sara Khan, Arjun Das share the skill Python.",
-      "extracted_by": "spaCy"
+      "extracted_by": "llm"
+    },
+    {
+      "source": "employee:6",
+      "target": "employee:1",
+      "relation": "TEAMMATE_OF",
+      "evidence": "They are on the DevOps team.",
+      "extracted_by": "llm"
+    },
+    {
+      "source": "employee:6",
+      "target": "employee:3",
+      "relation": "TEAMMATE_OF",
+      "evidence": "They are on the DevOps team.",
+      "extracted_by": "llm"
+    },
+    {
+      "source": "employee:6",
+      "target": "employee:5",
+      "relation": "TEAMMATE_OF",
+      "evidence": "They are on the DevOps team.",
+      "extracted_by": "llm"
     },
     {
       "source": "employee:8",
@@ -595,6 +672,34 @@
       "source": "employee:8",
       "target": "project:5",
       "relation": "WORKS_ON"
+    },
+    {
+      "source": "employee:8",
+      "target": "employee:1",
+      "relation": "TEAMMATE_OF",
+      "evidence": "They are on the ML Research team.",
+      "extracted_by": "llm"
+    },
+    {
+      "source": "employee:8",
+      "target": "employee:3",
+      "relation": "TEAMMATE_OF",
+      "evidence": "They are on the ML Research team.",
+      "extracted_by": "llm"
+    },
+    {
+      "source": "employee:8",
+      "target": "employee:5",
+      "relation": "TEAMMATE_OF",
+      "evidence": "They are on the ML Research team.",
+      "extracted_by": "llm"
+    },
+    {
+      "source": "employee:8",
+      "target": "employee:6",
+      "relation": "TEAMMATE_OF",
+      "evidence": "They are on the ML Research team.",
+      "extracted_by": "llm"
     },
     {
       "source": "project:2",

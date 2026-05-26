@@ -1,0 +1,123 @@
+{
+  "graph_path": "C:\\Users\\Admin\\Desktop\\rd\\knowledge graph\\graph_state.json",
+  "generated_at": "2026-05-26T05:16:05.756415Z",
+  "methods": {
+    "hardcoded": {
+      "name": "hardcoded",
+      "count": 73,
+      "by_relation": {
+        "DEPENDS_ON": 7,
+        "HAS_SKILL": 22,
+        "LOCATED_IN": 5,
+        "MANAGES": 2,
+        "MEMBER_OF": 8,
+        "OWNS_PROJECT": 6,
+        "PREREQUISITE_OF": 6,
+        "SUBDEPARTMENT_OF": 4,
+        "WORKS_ON": 13
+      },
+      "sample": [
+        {
+          "source": "department:1",
+          "target": "department:2",
+          "relation": "SUBDEPARTMENT_OF"
+        },
+        {
+          "source": "department:1",
+          "target": "department:3",
+          "relation": "SUBDEPARTMENT_OF"
+        },
+        {
+          "source": "department:1",
+          "target": "department:4",
+          "relation": "SUBDEPARTMENT_OF"
+        },
+        {
+          "source": "department:1",
+          "target": "department:5",
+          "relation": "SUBDEPARTMENT_OF"
+        },
+        {
+          "source": "employee:1",
+          "target": "employee:9",
+          "relation": "MANAGES"
+        },
+        {
+          "source": "employee:1",
+          "target": "project:1",
+          "relation": "WORKS_ON"
+        },
+        {
+          "source": "employee:1",
+          "target": "project:2",
+          "relation": "WORKS_ON"
+        },
+        {
+          "source": "employee:1",
+          "target": "skill:1",
+          "relation": "HAS_SKILL"
+        },
+        {
+          "source": "employee:1",
+          "target": "skill:2",
+          "relation": "HAS_SKILL"
+        },
+        {
+          "source": "employee:1",
+          "target": "skill:6",
+          "relation": "HAS_SKILL"
+        }
+      ]
+    },
+    "spacy": {
+      "name": "spacy",
+      "count": 0,
+      "by_relation": {},
+      "sample": [],
+      "overlap_with_hardcoded": 0,
+      "jaccard_with_hardcoded": 0.0
+    },
+    "llm_with_description": {
+      "name": "llm_with_description",
+      "count": 0,
+      "by_relation": {},
+      "sample": [],
+      "overlap_with_hardcoded": 0,
+      "jaccard_with_hardcoded": 0.0
+    },
+    "llm_without_description": {
+      "name": "llm_without_description",
+      "count": 0,
+      "by_relation": {},
+      "sample": [],
+      "overlap_with_hardcoded": 0,
+      "jaccard_with_hardcoded": 0.0
+    }
+  },
+  "pairwise_overlap": {
+    "llm_with_description__spacy": {
+      "overlap": 0,
+      "jaccard": 0.0
+    },
+    "llm_with_description__llm_without_description": {
+      "overlap": 0,
+      "jaccard": 0.0
+    },
+    "llm_without_description__spacy": {
+      "overlap": 0,
+      "jaccard": 0.0
+    },
+    "hardcoded__spacy": {
+      "overlap": 0,
+      "jaccard": 0.0
+    },
+    "hardcoded__llm_with_description": {
+      "overlap": 0,
+      "jaccard": 0.0
+    },
+    "hardcoded__llm_without_description": {
+      "overlap": 0,
+      "jaccard": 0.0
+    }
+  }
+}

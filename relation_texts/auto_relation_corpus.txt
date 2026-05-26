@@ -1,0 +1,64 @@
+Nandita Ray is a member of the Core Platform team.
+Rahul Sharma is a member of the Core Platform team.
+Vikram Rao is a member of the DevOps team.
+Sara Khan is a member of the DevOps team.
+Ananya Iyer is a member of the Product Apps team.
+Arjun Das is a member of the ML Research team.
+
+Nandita Ray works on Internal Graph Platform.
+Nandita Ray works on Sync Engine.
+Rahul Sharma works on Internal Graph Platform.
+Rahul Sharma works on Sync Engine.
+Vikram Rao works on Internal Graph Platform.
+Vikram Rao works on Sync Engine.
+Ananya Iyer works on Employee Portal.
+Ananya Iyer works on Onboarding Automation.
+Sara Khan works on Sync Engine.
+Sara Khan works on Onboarding Automation.
+Arjun Das works on Model Ops Toolkit.
+employee:9 works on Security Dashboard.
+employee:10 works on Security Dashboard.
+
+Nandita Ray and Rahul Sharma collaborated on Internal Graph Platform.
+Nandita Ray and Vikram Rao collaborated on Internal Graph Platform.
+Rahul Sharma and Vikram Rao collaborated on Internal Graph Platform.
+Nandita Ray and Sara Khan collaborated on Sync Engine.
+Rahul Sharma and Sara Khan collaborated on Sync Engine.
+Vikram Rao and Sara Khan collaborated on Sync Engine.
+Ananya Iyer and Sara Khan collaborated on Onboarding Automation.
+Ananya Iyer and Arjun Das collaborated on Model Ops Toolkit.
+
+Nandita Ray and Ananya Iyer both have skill SQL.
+Rahul Sharma and Ananya Iyer both have skill SQL.
+Vikram Rao and Ananya Iyer both have skill SQL.
+Nandita Ray and Rahul Sharma both have skill Python.
+Ananya Iyer and Arjun Das both have skill Python.
+Sara Khan and Arjun Das both have skill Python.
+
+Rahul Sharma and Nandita Ray are teammates on the Core Platform team.
+Vikram Rao and Sara Khan are teammates on the DevOps team.
+Ananya Iyer and her Product Apps teammates work together on Employee Portal.
+Arjun Das and his ML Research teammates work together on Model Ops Toolkit.
+
+Nandita Ray manages employee:9.
+employee:9 manages employee:10.
+
+Sync Engine depends on Internal Graph Platform.
+Employee Portal depends on Sync Engine.
+Employee Portal depends on Onboarding Automation.
+Onboarding Automation depends on Sync Engine.
+Security Dashboard depends on Internal Graph Platform.
+Model Ops Toolkit depends on Internal Graph Platform.
+
+Core Platform team owns Internal Graph Platform.
+Core Platform team owns Sync Engine.
+Product Apps team owns Employee Portal.
+Product Apps team owns Onboarding Automation.
+ML Research team owns Model Ops Toolkit.
+Security Ops team owns Security Dashboard.
+
+SQLite is a prerequisite for SQL.
+NetworkX is a prerequisite for SQL and Python.
+Data Modeling is a prerequisite for SQL and Project Planning.
+
+(If you want more granular pairwise sentences, I can expand this file into pairwise forms.)

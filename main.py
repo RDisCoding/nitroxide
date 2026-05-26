@@ -29,6 +29,8 @@ Extra commands
     python main.py link employee 3 project 2 WORKS_ON
     python main.py unlink employee 3 project 2 WORKS_ON
     python main.py extract
+    python main.py extract --mode llm
+    python main.py extract --mode llm --node-only
     python main.py viz
     python main.py sync
     python main.py push
@@ -124,6 +126,10 @@ def _get_cli_flag(flag_name, default=None):
     return value
 
 
+def _get_cli_bool(flag_name):
+    return flag_name in sys.argv
+
+
 def unlink_graph_nodes(source_entity, source_id, target_entity, target_id, relation=None):
     from graph_utils import load_graph, node_id, remove_edge, save_graph
 
@@ -202,8 +208,11 @@ def main():
         from relation_extractor import enrich_relations
 
         text_dir = _get_cli_flag("--text-dir")
-        bootstrap = "--bootstrap" in sys.argv
-        enrich_relations(text_dir=text_dir, bootstrap=bootstrap)
+        mode = _get_cli_flag("--mode", "spacy")
+        llm_model = _get_cli_flag("--model")
+        bootstrap = _get_cli_bool("--bootstrap")
+        node_only = _get_cli_bool("--node-only")
+        enrich_relations(text_dir=text_dir, mode=mode, bootstrap=bootstrap, llm_model=llm_model, node_only=node_only)
 
     elif cmd == "init":
         from setup_db    import setup

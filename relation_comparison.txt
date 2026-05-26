@@ -1,0 +1,150 @@
+Extracted 32 inferred relations using llm
+  COLLABORATES_WITH: employee:1 -> employee:3
+    evidence: They work on Internal Graph Platform, Sync Engine.
+  SHARES_PROJECT: employee:1 -> employee:3
+    evidence: Nandita Ray, Rahul Sharma, Vikram Rao share the project Internal Graph Platform.
+  COLLABORATES_WITH: employee:1 -> employee:5
+    evidence: They work on Internal Graph Platform, Sync Engine.
+  SHARES_PROJECT: employee:1 -> employee:5
+    evidence: Nandita Ray, Rahul Sharma, Vikram Rao share the project Internal Graph Platform.
+  SHARES_PROJECT: employee:1 -> employee:6
+    evidence: Nandita Ray, Rahul Sharma, Vikram Rao, Sara Khan share the project Sync Engine.
+  TEAMMATE_OF: employee:3 -> employee:1
+    evidence: They are on the Core Platform team.
+  COLLABORATES_WITH: employee:3 -> employee:5
+    evidence: They work on Internal Graph Platform, Sync Engine.
+  SHARES_PROJECT: employee:3 -> employee:5
+    evidence: Nandita Ray, Rahul Sharma, Vikram Rao share the project Internal Graph Platform.
+  SHARES_PROJECT: employee:3 -> employee:6
+    evidence: Nandita Ray, Rahul Sharma, Vikram Rao, Sara Khan share the project Sync Engine.
+  TEAMMATE_OF: employee:4 -> employee:1
+    evidence: They are on the Product Apps team.
+
+
+
+Extracted 14 inferred relations using spacy (for metadata-only inference)
+  SHARES_PROJECT: employee:1 -> employee:5
+    evidence: Nandita Ray, Rahul Sharma, Vikram Rao share the project Internal Graph Platform.
+  SHARES_PROJECT: employee:1 -> employee:3
+    evidence: Nandita Ray, Rahul Sharma, Vikram Rao share the project Internal Graph Platform.
+  SHARES_PROJECT: employee:1 -> employee:6
+    evidence: Nandita Ray, Rahul Sharma, Vikram Rao, Sara Khan share the project Sync Engine.
+  SHARES_SKILL: employee:1 -> employee:4
+    evidence: Nandita Ray, Rahul Sharma, Ananya Iyer, Vikram Rao share the skill SQL.
+  SHARES_SKILL: employee:1 -> employee:8
+    evidence: Nandita Ray, Rahul Sharma, Ananya Iyer, Sara Khan, Arjun Das share the skill Python.
+  SHARES_PROJECT: employee:3 -> employee:5
+    evidence: Nandita Ray, Rahul Sharma, Vikram Rao share the project Internal Graph Platform.
+  SHARES_PROJECT: employee:3 -> employee:6
+    evidence: Nandita Ray, Rahul Sharma, Vikram Rao, Sara Khan share the project Sync Engine.
+  SHARES_SKILL: employee:3 -> employee:4
+    evidence: Nandita Ray, Rahul Sharma, Ananya Iyer, Vikram Rao share the skill SQL.
+  SHARES_SKILL: employee:3 -> employee:8
+    evidence: Nandita Ray, Rahul Sharma, Ananya Iyer, Sara Khan, Arjun Das share the skill Python.
+  SHARES_PROJECT: employee:4 -> employee:6
+    evidence: Ananya Iyer, Sara Khan share the project Onboarding Automation.
+
+
+
+Extracted 26 inferred relations using llm
+  SHARES_PROJECT: employee:1 -> employee:5
+    evidence: Nandita Ray, Rahul Sharma, Vikram Rao share the project Internal Graph Platform.
+  SHARES_PROJECT: employee:1 -> employee:3
+    evidence: Nandita Ray, Rahul Sharma, Vikram Rao share the project Internal Graph Platform.
+  SHARES_PROJECT: employee:1 -> employee:6
+    evidence: Nandita Ray, Rahul Sharma, Vikram Rao, Sara Khan share the project Sync Engine.
+  SHARES_SKILL: employee:1 -> employee:4
+    evidence: Nandita Ray, Rahul Sharma, Ananya Iyer, Vikram Rao share the skill SQL.
+  SHARES_SKILL: employee:1 -> employee:8
+    evidence: Nandita Ray, Rahul Sharma, Ananya Iyer, Sara Khan, Arjun Das share the skill Python.
+  SHARES_PROJECT: employee:3 -> employee:5
+    evidence: Nandita Ray, Rahul Sharma, Vikram Rao share the project Internal Graph Platform.
+  SHARES_PROJECT: employee:3 -> employee:6
+    evidence: Nandita Ray, Rahul Sharma, Vikram Rao, Sara Khan share the project Sync Engine.
+  SHARES_SKILL: employee:3 -> employee:4
+    evidence: Nandita Ray, Rahul Sharma, Ananya Iyer, Vikram Rao share the skill SQL.
+  SHARES_SKILL: employee:3 -> employee:8
+    evidence: Nandita Ray, Rahul Sharma, Ananya Iyer, Sara Khan, Arjun Das share the skill Python.
+  TEAMMATE_OF: employee:3 -> employee:1
+    evidence: They are on the Core Platform team.
+
+
+
+(.venv) PS C:\Users\Admin\Desktop\rd\knowledge graph> python main.py extract --mode spacy --text-dir relation_texts
+Extracted 52 inferred relations using spacy
+  WORKS_ON: employee:1 -> project:1
+    evidence: Nandita Ray works on Internal Graph Platform.
+  WORKS_ON: employee:3 -> project:1
+    evidence: Rahul Sharma works on Internal Graph Platform.
+  WORKS_ON: employee:5 -> project:1
+    evidence: Vikram Rao works on Internal Graph Platform.
+  COLLABORATES_WITH: employee:1 -> employee:3
+    evidence: Nandita Ray and Rahul Sharma collaborated on Internal Graph Platform.
+  SHARES_PROJECT: employee:1 -> employee:3
+    evidence: Nandita Ray, Rahul Sharma, Vikram Rao share the project Internal Graph Platform.
+  COLLABORATES_WITH: employee:1 -> employee:5
+    evidence: Nandita Ray and Vikram Rao collaborated on Internal Graph Platform.
+  SHARES_PROJECT: employee:1 -> employee:5
+    evidence: Nandita Ray, Rahul Sharma, Vikram Rao share the project Internal Graph Platform.
+  COLLABORATES_WITH: employee:3 -> employee:5
+    evidence: Rahul Sharma and Vikram Rao collaborated on Internal Graph Platform.
+  SHARES_PROJECT: employee:3 -> employee:5
+    evidence: Nandita Ray, Rahul Sharma, Vikram Rao share the project Internal Graph Platform.
+  COLLABORATES_WITH: employee:1 -> employee:6
+    evidence: Nandita Ray and Sara Khan collaborated on Sync Engine.
+
+
+
+(.venv) PS C:\Users\Admin\Desktop\rd\knowledge graph> python main.py extract --mode llm --text-dir relation_texts  
+Extracted 26 inferred relations using llm
+  SHARES_SKILL: employee:1 -> employee:5
+    evidence: Rahul Sharma and Ananya Iyer both have skill SQL.
+Vikram Rao and Ananya Iyer both have skill SQL.
+Nandita Ray and Rahul Sharma both have skill Python.
+  TEAMMATE_OF: employee:1 -> employee:3
+    evidence: Rahul Sharma and Nandita Ray are teammates on the Core Platform team.
+  SHARES_PROJECT: employee:1 -> employee:6
+    evidence: Nandita Ray, Rahul Sharma, Vikram Rao, Sara Khan share the project Sync Engine.
+  SHARES_SKILL: employee:1 -> employee:4
+    evidence: Nandita Ray, Rahul Sharma, Ananya Iyer, Vikram Rao share the skill SQL.
+  SHARES_SKILL: employee:1 -> employee:8
+    evidence: Nandita Ray, Rahul Sharma, Ananya Iyer, Sara Khan, Arjun Das share the skill Python.
+  SHARES_SKILL: employee:3 -> employee:5
+    evidence: Rahul Sharma and Ananya Iyer both have skill SQL.
+Vikram Rao and Ananya Iyer both have skill SQL.
+Nandita Ray and Rahul Sharma both have skill Python.
+  SHARES_PROJECT: employee:3 -> employee:6
+    evidence: Nandita Ray, Rahul Sharma, Vikram Rao, Sara Khan share the project Sync Engine.
+  SHARES_PROJECT: employee:3 -> employee:4
+    evidence: Rahul Sharma and Vikram Rao share the skill SQL.
+Ananya Iyer and Sara Khan worked on the Sync Engine.
+  SHARES_SKILL: employee:3 -> employee:8
+    evidence: Nandita Ray, Rahul Sharma, Ananya Iyer, Sara Khan, Arjun Das share the skill Python.
+  TEAMMATE_OF: employee:3 -> employee:1
+    evidence: They are on the Core Platform team.
+
+
+
+
+What you’re seeing is expected.
+
+In the current implementation, both modes are still operating over very structured, low-entropy data, so they often converge on similar relations. The LLM is not getting some magical extra source of truth; it is mostly seeing node metadata like name, role, entity, and maybe a few direct fields. SpaCy is also not doing free-form reasoning from nowhere, because it is still being fed structured summaries or templated text. That’s why the outputs look close.
+
+The key point is this: descriptions only help if they add information that is not already obvious from the node fields. If a description is just a paraphrase of the metadata, it will not change much. For example, “Rahul Sharma is a Principal Engineer on Core Platform” is basically the same signal as name + role + team. The model has little new to learn from that.
+
+So for your case:
+- If you give only raw node metadata, the LLM can still infer some relations, but only weakly and inconsistently.
+- If you give descriptions that contain genuinely new facts, the LLM gets better.
+- If you give relation-oriented text like “Rahul collaborates with Vikram on Sync Engine,” that is much better than a generic node description.
+
+That also explains the difference between the comparison outputs:
+- The spaCy run is mostly extracting from sentence patterns tied to graph structure.
+- The LLM run is reading the same kind of compact structure and making similar guesses.
+- The extra descriptions did not help much because they were derived from the graph itself, not independent evidence.
+
+So the practical conclusion is:
+- Descriptions are optional, not essential.
+- They only matter if they contain real extra semantics.
+- For best results, provide relation text or notes, not just node summaries.
+
+If you want, I can make the pipeline work in the “best practical” way: raw node metadata + optional relation notes, and explicitly stop relying on generated descriptions altogether.

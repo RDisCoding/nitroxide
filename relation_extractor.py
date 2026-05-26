@@ -1,11 +1,19 @@
 from __future__ import annotations
 
+import json
+import os
 from itertools import combinations
 import sqlite3
 from pathlib import Path
 
 from config import GRAPH_PATH, SNAPSHOT_PATH, SQLITE_PATH
 from graph_utils import load_graph, save_graph
+
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except Exception:
+    pass
 
 
 INFERRED_RELATIONS = {
@@ -105,6 +113,228 @@ def _collect_text_corpus(graph, text_dir=None):
                         continue
 
     return documents
+
+
+def _node_text(graph, node):
+    data = graph.nodes[node]
+    for field in TEXT_FIELDS:
+        value = data.get(field)
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+    return build_fallback_description(graph, node)
+
+
+def build_fallback_description(graph, node):
+    data = graph.nodes[node]
+    entity = data.get("entity") or str(node).split(":", 1)[0]
+    label = _node_label(data)
+    if label == "node" and isinstance(node, str):
+        label = node
+
+    if entity == "employee":
+        parts = [f"{label} is an employee."]
+        if data.get("role"):
+            parts.append(f"Role: {data['role']}.")
+        return " ".join(parts)
+    if entity == "team":
+        return f"{label} is a team."
+    if entity == "department":
+        return f"{label} is a department."
+    if entity == "project":
+        return f"{label} is a project."
+    if entity == "skill":
+        return f"{label} is a skill."
+    return f"{label} is a {entity or 'node'}."
+
+
+def _make_node_records(graph):
+    records = []
+    for node, data in graph.nodes(data=True):
+        payload = {
+            key: value
+            for key, value in data.items()
+            if key not in {"entity", "label"}
+        }
+        records.append(
+            {
+                "node_id": node,
+                "entity": data.get("entity"),
+                "label": _node_label(data),
+                **payload,
+            }
+        )
+    return records
+
+
+def _make_relation_candidates(graph):
+    candidates = []
+    for node, data in graph.nodes(data=True):
+        if data.get("entity") != "employee":
+            continue
+        candidates.append(
+            {
+                "node_id": node,
+                "entity": data.get("entity"),
+                "label": data.get("label"),
+                **{k: v for k, v in data.items() if k not in {"entity", "label", "description"}},
+            }
+        )
+    return candidates
+
+
+def _load_groq_client():
+    try:
+        from groq import Groq
+    except Exception as exc:
+        raise RuntimeError("Groq SDK is not installed. Install the 'groq' package first.") from exc
+
+    api_key = os.getenv("GROQ_API_KEY")
+    if not api_key:
+        raise RuntimeError("Missing GROQ_API_KEY. Put it in the .env file or environment.")
+    return Groq(api_key=api_key)
+
+
+def _clean_json_text(text):
+    text = text.strip()
+    if text.startswith("```"):
+        text = text.split("\n", 1)[1] if "\n" in text else text
+        if text.endswith("```"):
+            text = text[:-3]
+    return text.strip()
+
+
+def _parse_llm_output(text):
+    text = _clean_json_text(text)
+
+    try:
+        payload = json.loads(text)
+    except Exception:
+        # Attempt to recover a JSON array/object from noisy LLM output by
+        # extracting the first balanced JSON block (array or object).
+        def _find_matching(text, start_idx, open_ch, close_ch):
+            depth = 0
+            for i in range(start_idx, len(text)):
+                ch = text[i]
+                if ch == open_ch:
+                    depth += 1
+                elif ch == close_ch:
+                    depth -= 1
+                    if depth == 0:
+                        return i
+            return -1
+
+        payload = None
+        # Try to find an array first
+        start = text.find("[")
+        if start != -1:
+            end = _find_matching(text, start, "[", "]")
+            if end != -1:
+                snippet = text[start:end + 1]
+                try:
+                    payload = json.loads(snippet)
+                except Exception:
+                    payload = None
+
+        # If no array, try an object
+        if payload is None:
+            start = text.find("{")
+            if start != -1:
+                end = _find_matching(text, start, "{", "}")
+                if end != -1:
+                    snippet = text[start:end + 1]
+                    try:
+                        payload = json.loads(snippet)
+                    except Exception:
+                        payload = None
+
+        if payload is None:
+            raise ValueError("Unable to parse LLM output as JSON; received: %r" % (text[:200],))
+
+    if isinstance(payload, dict):
+        payload = payload.get("relations", payload.get("items", []))
+    if not isinstance(payload, list):
+        raise ValueError("LLM output must be a JSON list of relations.")
+    return payload
+
+
+def _chunk_records(records, max_records=8):
+    for index in range(0, len(records), max_records):
+        yield records[index:index + max_records]
+
+
+def _llm_extract(graph, documents, model=None, include_text=False, node_only=False):
+    client = _load_groq_client()
+    model_name = model or os.getenv("GROQ_MODEL", "llama-3.1-8b-instant")
+
+    if node_only:
+        records = _make_relation_candidates(graph)
+    else:
+        records = _make_node_records(graph)
+
+    node_blob = json.dumps(records, ensure_ascii=False, separators=(",", ":"))
+
+    doc_lines = []
+    if include_text:
+        for source, text in documents:
+            snippet = " ".join(text.split())
+            if len(snippet) > 1200:
+                snippet = snippet[:1200] + "..."
+            doc_lines.append(f"SOURCE: {source}\nTEXT: {snippet}")
+
+    system_prompt = (
+        "You are a relation extraction engine. "
+        "Infer relations only from the provided node data. "
+        "If extra text sources are present, use them as supporting evidence only. "
+        "Return a JSON array only. Each item must contain source_node, target_node, relation, evidence, confidence. "
+        "Only use node_id values that appear in the node list. "
+        "Do not invent nodes. Prefer relations that are explicitly supported by the text. "
+        "Only emit one of these relation types: COLLABORATES_WITH, TEAMMATE_OF, SHARES_SKILL, SHARES_PROJECT."
+    )
+    inferred = []
+    seen = set()
+    allowed_nodes = {item["node_id"] for item in records}
+
+    for batch in _chunk_records(records, max_records=6 if node_only else 10):
+        batch_blob = json.dumps(batch, ensure_ascii=False, separators=(",", ":"))
+        user_prompt = (
+            "NODE DATA JSON:\n"
+            + batch_blob
+            + ("\n\nTEXT SOURCES:\n" + "\n\n".join(doc_lines) if doc_lines and not node_only else "")
+            + "\n\nReturn JSON only."
+        )
+
+        response = client.chat.completions.create(
+            model=model_name,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
+            temperature=0,
+            max_tokens=2000,
+        )
+
+        content = response.choices[0].message.content or "[]"
+        parsed = _parse_llm_output(content)
+
+        for item in parsed:
+            source = item.get("source_node")
+            target = item.get("target_node")
+            relation = item.get("relation")
+            evidence = item.get("evidence") or ""
+            if not source or not target or not relation:
+                continue
+            if source not in allowed_nodes or target not in allowed_nodes:
+                continue
+            relation = str(relation).upper().strip()
+            if relation not in INFERRED_RELATIONS:
+                continue
+            key = (source, target, relation)
+            if key in seen:
+                continue
+            seen.add(key)
+            inferred.append((source, target, relation, evidence or f"LLM inferred {relation}"))
+
+    return inferred
 
 
 def _build_sentences(graph):
@@ -280,25 +510,31 @@ def _dedupe_existing_graph_edges(graph):
     return inferred
 
 
-def enrich_relations(graph_path=GRAPH_PATH, snapshot_path=SNAPSHOT_PATH, text_dir=None, bootstrap=False):
+def enrich_relations(graph_path=GRAPH_PATH, snapshot_path=SNAPSHOT_PATH, text_dir=None, mode="spacy", bootstrap=False, llm_model=None, node_only=False):
     graph = load_graph(graph_path)
     documents = _collect_text_corpus(graph, text_dir=text_dir)
 
     inferred = []
-    extractor_name = "spaCy"
+    extractor_name = mode
 
-    if documents:
-        try:
-            inferred = _spacy_extract(graph, documents)
-        except Exception as exc:
-            print(f"spaCy extraction failed; using fallback bootstrap mode ({exc.__class__.__name__}).")
-            inferred = _fallback_extract(graph, _build_sentences(graph)) if bootstrap else []
-            extractor_name = "fallback"
+    if mode == "llm":
+        if not documents and not node_only:
+            print("No free-text sources found on nodes or in the optional text directory.")
+        inferred = _llm_extract(graph, documents, model=llm_model, include_text=not node_only, node_only=node_only)
+        extractor_name = "llm"
     else:
-        print("No free-text sources found on nodes or in the optional text directory.")
-        if bootstrap:
-            inferred = _fallback_extract(graph, _build_sentences(graph))
-            extractor_name = "fallback"
+        if documents:
+            try:
+                inferred = _spacy_extract(graph, documents)
+            except Exception as exc:
+                print(f"spaCy extraction failed; using fallback bootstrap mode ({exc.__class__.__name__}).")
+                inferred = _fallback_extract(graph, _build_sentences(graph)) if bootstrap else []
+                extractor_name = "fallback"
+        else:
+            print("No free-text sources found on nodes or in the optional text directory.")
+            if bootstrap:
+                inferred = _fallback_extract(graph, _build_sentences(graph))
+                extractor_name = "fallback"
 
     existing_inferred = _dedupe_existing_graph_edges(graph)
     inferred.extend((source, target, relation, evidence) for source, target, relation, evidence, _by in existing_inferred)

@@ -45,6 +45,48 @@ Then edit either side:
 
 The watcher will push graph changes into SQLite and refresh the graph when SQLite changes.
 
+## Command reference
+
+Use this section as the quick reference for what each command does and when to use it.
+
+### Core database and graph workflow
+
+- `python main.py setup`: create and seed the SQLite database from scratch. Use this when you want a clean reset.
+- `python main.py push`: rebuild `graph_state.json` and `graph_snapshot.json` from SQLite. Use this after direct SQL edits or when you want the graph to match the database.
+- `python main.py sync`: push graph edits back into SQLite. Use this after editing node properties or edges in the JSON graph.
+- `python main.py init`: run `setup` and `push` in one step. Use this for a first-time setup or when you want to reset everything and repopulate the graph.
+- `python main.py watch`: keep SQLite and the graph in sync live. Use this when you are actively editing both sides.
+- `python main.py status`: print the current database state plus inferred relations. Use this when you want a quick sanity check.
+- `python main.py viz`: generate `graph_visualization.html`. Use this when you want to inspect the graph visually.
+
+### Manual graph edits
+
+- `python main.py set <entity> <sql_id> <field> <value>`: update a single node attribute in the graph. Use this for quick metadata edits like `role`, `name`, or `description`.
+- `python main.py link <source_entity> <source_id> <target_entity> <target_id> <relation>`: add a graph edge. Use this when you want to connect two nodes directly.
+- `python main.py unlink <source_entity> <source_id> <target_entity> <target_id> [relation]`: remove a graph edge. Use this when a relation is wrong or no longer valid.
+
+### Relation extraction
+
+- `python main.py extract`: run the default spaCy-based relation extraction. Use this when you want the model to read node descriptions.
+- `python main.py extract --mode llm`: run Groq LLM extraction. Use this when you want the LLM to infer relations from node data.
+- `python main.py extract --mode llm --node-only`: run Groq using only node metadata. Use this when you do not want to provide any extra text corpus.
+- `python main.py extract --mode llm --text-dir relation_texts`: run Groq and also include extra `.txt`, `.md`, or `.rst` files from a folder. Use this when you have supporting notes outside the graph.
+- `python backfill_descriptions.py`: regenerate node descriptions inside `graph_state.json` and `graph_snapshot.json`. Use this after changing graph structure or description logic.
+
+### Direct SQL edits
+
+- `python sql_change.py --sql "UPDATE ..."`: apply one or more SQL statements directly to SQLite. Use this when the database is the source of truth for a change.
+- `python sql_change.py --file changes.sql`: apply SQL from a file. Use this when you have a prepared SQL script.
+- `python sql_change.py --sql "UPDATE ..." --sync-graph`: apply SQL and immediately refresh the graph from SQLite. Use this when you want both sides updated without a second command.
+
+### Typical choices
+
+- If you edited SQL directly, run `python main.py push`.
+- If you edited the graph JSON directly, run `python main.py sync`.
+- If you want to infer relations from the node descriptions only, run `python main.py extract --mode llm --node-only`.
+- If you want to infer relations from descriptions plus extra notes, run `python main.py extract --mode llm --text-dir relation_texts`.
+- If you just want the simplest setup, run `python main.py init`.
+
 ## spaCy relation extraction
 
 Run the extractor to infer extra relations from the current graph:
@@ -62,6 +104,36 @@ If you change the graph structure and want the descriptions refreshed, run:
 ```bash
 python backfill_descriptions.py
 ```
+
+## Groq LLM relation extraction
+
+If you want to infer relations with an LLM instead of spaCy, put your API key in `.env`:
+
+```bash
+GROQ_API_KEY=your_key_here
+GROQ_MODEL=llama-3.1-8b-instant
+```
+
+Then run:
+
+```bash
+python main.py extract --mode llm
+```
+
+If you want the LLM to use only raw node metadata and no descriptions or extra text sources, run:
+
+```bash
+python main.py extract --mode llm --node-only
+```
+
+You can also point it at extra text sources:
+
+```bash
+python main.py extract --mode llm --text-dir relation_texts
+```
+
+This mode reads the node descriptions and text sources, asks Groq to return JSON relations, and writes the inferred edges back into the graph.
+The `--node-only` flag switches it to raw node metadata only. Use this when you do not want to maintain descriptions and only have the node fields themselves plus optional relation text files.
 
 ## SQL change script
 
@@ -84,20 +156,6 @@ python main.py push
 ```
 
 That command rebuilds `graph_state.json` from the current SQLite database.
-
-## Useful commands
-
-```bash
-python main.py status
-python main.py viz
-python main.py set employee 3 role Staff Engineer
-python main.py link employee 3 skill 4 HAS_SKILL
-python main.py unlink employee 3 skill 4 HAS_SKILL
-python main.py extract
-python main.py sync
-python main.py push
-python sql_change.py --sql "UPDATE employees SET role = 'Principal Engineer' WHERE id = 3" --sync-graph
-```
 
 ## Visualize the graph
 
