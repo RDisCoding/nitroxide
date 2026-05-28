@@ -6,7 +6,7 @@ Usage examples:
 """
 import sqlite3
 import argparse
-from neo4j_client import get_driver
+from neo4j_client import get_default_database, get_driver_with_fallback
 
 ALLOWED_RELATIONS = {"COLLABORATES_WITH", "TEAMMATE_OF", "SHARES_SKILL", "SHARES_PROJECT", "MANAGES", "MEMBER_OF", "IN_DEPARTMENT"}
 
@@ -14,8 +14,8 @@ ALLOWED_RELATIONS = {"COLLABORATES_WITH", "TEAMMATE_OF", "SHARES_SKILL", "SHARES
 def push_sql(sqlite_path, neo4j_uri=None, neo4j_user=None, neo4j_password=None):
     conn = sqlite3.connect(sqlite_path)
     cur = conn.cursor()
-    driver = get_driver(neo4j_uri, neo4j_user, neo4j_password)
-    with driver.session() as session:
+    driver = get_driver_with_fallback(neo4j_uri, neo4j_user, neo4j_password)
+    with driver.session(database=get_default_database()) as session:
         # Departments
         try:
             for id, name in cur.execute("SELECT id, name FROM departments"):
@@ -53,16 +53,28 @@ def push_sql(sqlite_path, neo4j_uri=None, neo4j_user=None, neo4j_password=None):
                     )
         except Exception:
             pass
-        # Inferred relations table (if exists)
+        # Inferred relations table (if exists) - try multiple known schemas
         try:
-            for src, dst, rtype in cur.execute("SELECT src_id, dst_id, relation_type FROM inferred_relations"):
-                if rtype not in ALLOWED_RELATIONS:
-                    continue
-                # relationship type must be a literal in Cypher, validate above
-                cypher = f"MATCH (a {{id:$a}}), (b {{id:$b}}) MERGE (a)-[r:{rtype}]->(b)"
-                session.run(cypher, a=src, b=dst)
+            # try legacy schema (src_id, dst_id, relation_type)
+            rows = list(cur.execute("SELECT src_id, dst_id, relation_type FROM inferred_relations"))
         except Exception:
-            pass
+            try:
+                # fallback to modern schema (source_node, target_node, relation)
+                rows = list(cur.execute("SELECT source_node, target_node, relation FROM inferred_relations"))
+            except Exception:
+                rows = []
+
+        for row in rows:
+            if len(row) >= 3:
+                src, dst, rtype = row[0], row[1], row[2]
+            else:
+                continue
+            if not isinstance(rtype, str):
+                rtype = str(rtype)
+            if rtype not in ALLOWED_RELATIONS:
+                continue
+            cypher = f"MATCH (a {{id:$a}}), (b {{id:$b}}) MERGE (a)-[r:{rtype}]->(b)"
+            session.run(cypher, a=src, b=dst)
     conn.close()
     driver.close()
 
