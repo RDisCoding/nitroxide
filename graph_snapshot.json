@@ -135,24 +135,6 @@
       "description": "Sara Khan is a DevOps Engineer. They are on the DevOps team. They work on Sync Engine, Onboarding Automation. They have skills in Python, SQLite. They report to Vikram Rao."
     },
     {
-      "node_id": "employee:7",
-      "entity": "employee",
-      "label": "Employee",
-      "sql_id": 7,
-      "name": "Meera Sen",
-      "role": "ML Manager",
-      "description": "Meera Sen is a ML Manager. They are on the ML Research team. They work on Model Ops Toolkit, Onboarding Automation. They have skills in SQL, Python, Project Planning. They report to Nandita Ray."
-    },
-    {
-      "node_id": "employee:8",
-      "entity": "employee",
-      "label": "Employee",
-      "sql_id": 8,
-      "name": "Arjun Das",
-      "role": "ML Engineer",
-      "description": "Arjun Das is a ML Engineer. They are on the ML Research team. They work on Model Ops Toolkit. They have skills in Python, NetworkX. They report to Meera Sen."
-    },
-    {
       "node_id": "employee:9",
       "entity": "employee",
       "label": "Employee",
@@ -160,15 +142,6 @@
       "name": "Imran Ali",
       "role": "Security Manager",
       "description": "Imran Ali is a Security Manager. They are on the Security Ops team. They work on Security Dashboard. They have skills in SQL, Security Analysis, Data Modeling. They report to Nandita Ray."
-    },
-    {
-      "node_id": "employee:10",
-      "entity": "employee",
-      "label": "Employee",
-      "sql_id": 10,
-      "name": "Asha Patel",
-      "role": "Security Analyst",
-      "description": "Asha Patel is a Security Analyst. They are on the Security Ops team. They work on Security Dashboard. They have skills in SQL, Security Analysis. They report to Imran Ali."
     },
     {
       "node_id": "project:1",
@@ -368,11 +341,6 @@
     },
     {
       "source": "employee:1",
-      "target": "employee:7",
-      "relation": "MANAGES"
-    },
-    {
-      "source": "employee:1",
       "target": "employee:9",
       "relation": "MANAGES"
     },
@@ -562,69 +530,9 @@
       "relation": "WORKS_ON"
     },
     {
-      "source": "employee:7",
-      "target": "team:3",
-      "relation": "MEMBER_OF"
-    },
-    {
-      "source": "employee:7",
-      "target": "employee:8",
-      "relation": "MANAGES"
-    },
-    {
-      "source": "employee:7",
-      "target": "skill:1",
-      "relation": "HAS_SKILL"
-    },
-    {
-      "source": "employee:7",
-      "target": "skill:2",
-      "relation": "HAS_SKILL"
-    },
-    {
-      "source": "employee:7",
-      "target": "skill:6",
-      "relation": "HAS_SKILL"
-    },
-    {
-      "source": "employee:7",
-      "target": "project:5",
-      "relation": "WORKS_ON"
-    },
-    {
-      "source": "employee:7",
-      "target": "project:6",
-      "relation": "WORKS_ON"
-    },
-    {
-      "source": "employee:8",
-      "target": "team:3",
-      "relation": "MEMBER_OF"
-    },
-    {
-      "source": "employee:8",
-      "target": "skill:2",
-      "relation": "HAS_SKILL"
-    },
-    {
-      "source": "employee:8",
-      "target": "skill:4",
-      "relation": "HAS_SKILL"
-    },
-    {
-      "source": "employee:8",
-      "target": "project:5",
-      "relation": "WORKS_ON"
-    },
-    {
       "source": "employee:9",
       "target": "team:5",
       "relation": "MEMBER_OF"
-    },
-    {
-      "source": "employee:9",
-      "target": "employee:10",
-      "relation": "MANAGES"
     },
     {
       "source": "employee:9",
@@ -643,26 +551,6 @@
     },
     {
       "source": "employee:9",
-      "target": "project:4",
-      "relation": "WORKS_ON"
-    },
-    {
-      "source": "employee:10",
-      "target": "team:5",
-      "relation": "MEMBER_OF"
-    },
-    {
-      "source": "employee:10",
-      "target": "skill:1",
-      "relation": "HAS_SKILL"
-    },
-    {
-      "source": "employee:10",
-      "target": "skill:5",
-      "relation": "HAS_SKILL"
-    },
-    {
-      "source": "employee:10",
       "target": "project:4",
       "relation": "WORKS_ON"
     },

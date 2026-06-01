@@ -31,6 +31,7 @@ Extra commands
     python main.py extract
     python main.py extract --mode llm
     python main.py extract --mode llm --node-only
+    python main.py parse-pid <image_path>
     python main.py viz
     python main.py sync
     python main.py push
@@ -220,6 +221,13 @@ def main():
         setup()
         push_to_graph()
         print("System initialised. Edit graph_state.json to explore the graph.")
+
+    elif cmd == "parse-pid":
+        if len(sys.argv) < 3:
+            print("Usage: python main.py parse-pid <image_path>")
+            return
+        from pid_extractor import extract_pid_to_graph
+        extract_pid_to_graph(sys.argv[2])
 
     else:
         print(f"Unknown command: '{cmd}'")
